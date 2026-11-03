@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Playshelf</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout concept: a shop shelf of game cartridges. Every shared link gets a labelled cartridge. */
+:root{
+  --bg:#e9ecf7;--surface:#fff;--sunk:#dde1f1;--ink:#14172b;--muted:#565c7d;--line:#c5cae0;
+  --accent:#2a3de0;--on-accent:#fff;--pop:#ffcf33;--on-pop:#14172b;--danger:#b4232f;
+  --display:"Dela Gothic One","Arial Black",Impact,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111428;--surface:#1c2040;--sunk:#0b0d1d;--ink:#eef0ff;--muted:#a2a8cd;--line:#343a66;
+  --accent:#8c99ff;--on-accent:#0d1030;--pop:#ffcf33;--on-pop:#14172b;--danger:#ff8a93;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111428;--surface:#1c2040;--sunk:#0b0d1d;--ink:#eef0ff;--muted:#a2a8cd;--line:#343a66;
+  --accent:#8c99ff;--on-accent:#0d1030;--pop:#ffcf33;--on-pop:#14172b;--danger:#ff8a93;color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);min-height:100vh}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+a{color:inherit}
+h1,h2,h3,p{margin:0}
+h1,h2{font-family:var(--display);font-weight:400;line-height:1.08;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-size:.78rem}
+.muted{color:var(--muted)}
+.eyebrow{font:600 .72rem var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);border-bottom:2px solid var(--ink)}
+.bar{display:flex;align-items:center;gap:12px;padding-block:10px;flex-wrap:wrap}
+.logo{font:400 1.45rem var(--display);text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo i{display:block;width:22px;height:26px;background:var(--accent);clip-path:polygon(0 0,72% 0,100% 18%,100% 100%,0 100%)}
+#search{flex:1 1 180px;min-width:0;padding:9px 12px;background:var(--surface);border:2px solid var(--ink);border-radius:0}
+.nav{display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:2px solid var(--ink);background:var(--surface);font-weight:600;cursor:pointer;text-decoration:none;box-shadow:3px 3px 0 var(--ink);transition:transform .1s,box-shadow .1s;white-space:nowrap}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
+.btn.primary{background:var(--accent);color:var(--on-accent)}
+.btn.pop{background:var(--pop);color:var(--on-pop)}
+.btn.flat{box-shadow:none;border-color:var(--line);font-weight:500}
+.btn.flat:hover,.btn.flat:active{transform:none;box-shadow:none;border-color:var(--ink)}
+.btn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.danger{color:var(--danger)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+#notice{background:var(--pop);color:var(--on-pop);font-size:.9rem}
+#notice .wrap{padding-block:8px}
+
+/* browse */
+main{padding-block:24px 64px}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:32px;align-items:center;padding-block:12px 32px}
+.hero h1{font-size:clamp(2.3rem,6.2vw,4.3rem)}
+.hero p{margin-top:14px;font-size:1.1rem;max-width:34em;color:var(--muted)}
+.hero .acts{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.spot{display:flex;flex-direction:column;gap:8px;min-width:0}
+.controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;border-top:2px solid var(--ink);padding-block:14px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:5px 11px;border:1.5px solid var(--line);background:transparent;cursor:pointer;font-size:.88rem;font-weight:500}
+.chip:hover{border-color:var(--ink)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.spacer{flex:1}
+select{padding:7px 10px;background:var(--surface);border:1.5px solid var(--line)}
+#tagrow{padding-bottom:14px}
+#tagrow:empty{display:none}
+#count{margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:22px}
+
+/* cartridge */
+.cart{display:flex;flex-direction:column;background:var(--surface);border:2px solid var(--ink);text-decoration:none;clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,0 100%);transition:transform .14s ease;min-width:0;position:relative}
+.cart:hover{transform:translateY(-5px)}
+.cart::before{content:"";height:12px;flex:none;background:repeating-linear-gradient(90deg,var(--ink) 0 3px,transparent 3px 8px);opacity:.75;margin:5px 28px 5px 10px}
+.label{position:relative;aspect-ratio:16/10;overflow:hidden;margin:0 10px;max-width:100%}
+.label svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.label b{position:absolute;left:10px;bottom:0;font:400 3.8rem/1.15 var(--display);color:#fff;text-shadow:3px 3px 0 #0009}
+.kind{position:absolute;top:8px;right:8px;background:#14172b;color:#fff;font:600 .66rem var(--mono);letter-spacing:.08em;padding:2px 7px}
+.cart .txt{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.cart h3{font-size:1.04rem;line-height:1.25;font-weight:700;overflow-wrap:anywhere}
+.cart p{font-size:.88rem;color:var(--muted);overflow-wrap:anywhere}
+.cart .foot{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;color:var(--muted)}
+.host{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.hid{position:absolute;left:18px;top:30px;background:var(--danger);color:#fff;font:600 .66rem var(--mono);padding:2px 7px}
+
+/* empty */
+.empty{border:2px dashed var(--line);padding:32px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:14px}
+.empty h2{font-size:1.5rem}
+.ghost{aspect-ratio:16/11;border:2px dashed var(--line);clip-path:polygon(0 0,calc(100% - 22px) 0,100% 22px,100% 100%,0 100%);display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;color:var(--muted);background:var(--sunk);text-decoration:none}
+
+/* detail */
+.back{display:inline-block;margin-bottom:14px;font-weight:600}
+.detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:32px;align-items:start}
+.detail h1{font-size:clamp(1.9rem,4.4vw,3rem);overflow-wrap:anywhere}
+.stack{display:flex;flex-direction:column;gap:14px;min-width:0}
+.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tags .chip{font-family:var(--mono);font-size:.76rem}
+.desc{white-space:pre-wrap;overflow-wrap:anywhere;max-width:65ch}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.92rem}
+.facts dt{color:var(--muted)}.facts dd{margin:0;overflow-wrap:anywhere}
+.link{background:none;border:0;padding:0;text-decoration:underline;cursor:pointer;font-weight:600}
+section.talk{margin-top:36px;border-top:2px solid var(--ink);padding-top:18px;max-width:760px}
+.talk h2{font-size:1.3rem;margin-bottom:14px}
+.cmt{padding:12px 0;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.cmt p{white-space:pre-wrap;overflow-wrap:anywhere}
+.cmt .meta{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;font-size:.85rem}
+.cmt .link{font-weight:500;font-size:.82rem;color:var(--muted)}
+
+/* forms */
+.form{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:36px;align-items:start}
+.form h1{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:16px;border:0;padding:0;min-width:0}
+.field>label,.field>legend{font-weight:600;padding:0}
+.field small{color:var(--muted)}
+input[type=text],input[type=url],input[type=email],textarea{width:100%;padding:10px 12px;background:var(--surface);border:2px solid var(--line);border-radius:0}
+input:focus,textarea:focus{border-color:var(--ink)}
+textarea{min-height:110px;resize:vertical}
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opts label{display:flex;gap:6px;align-items:center;padding:5px 10px;border:1.5px solid var(--line);cursor:pointer;font-size:.92rem}
+.opts label:has(input:checked){border-color:var(--ink);background:var(--sunk);font-weight:600}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.swatch{width:36px;height:36px;border:2px solid transparent;cursor:pointer;padding:0;overflow:hidden;position:relative}
+.swatch[aria-pressed=true]{border-color:var(--ink);outline:2px solid var(--pop)}
+.swatch svg{width:100%;height:100%;display:block}
+.drop{border:2px dashed var(--line);padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.drop.over{border-color:var(--accent);background:var(--sunk)}
+.drop input{max-width:100%}
+textarea.code{font:.8rem/1.45 var(--mono);min-height:90px;white-space:pre;overflow:auto}
+.err{color:var(--danger);font-weight:600;margin-bottom:12px}
+.preview{position:sticky;top:90px}
+.preview .cart{margin-top:8px;pointer-events:none}
+dialog{border:2px solid var(--ink);background:var(--surface);color:var(--ink);padding:22px;max-width:min(420px,calc(100vw - 32px));box-shadow:6px 6px 0 var(--ink)}
+dialog::backdrop{background:#0008}
+dialog h2{font-size:1.4rem;margin-bottom:12px}
+
+/* player */
+#player{position:fixed;inset:0;z-index:30;background:#0a0b16;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+#player .pbar{display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));color:#fff;flex-wrap:wrap}
+#player .pbar strong{flex:1;min-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#player iframe{flex:1;min-height:0;border:0;width:100%;background:#fff}
+#player .btn{--ink:#fff;background:#1c2040;color:#fff;box-shadow:none;padding:5px 10px;font-size:.88rem}
+#player small{color:#c0c5e6;padding:4px 12px 8px}
+#reports .row{padding:10px 0;border-bottom:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between}
+.shelfsec{margin-bottom:34px}.shelfsec h2{font-size:1.4rem;margin-bottom:14px}
+@media (max-width:760px){
+  .hero,.detail,.form{grid-template-columns:minmax(0,1fr)}
+  .preview{position:static;order:-1;max-width:300px}
+  .hero{gap:20px}
+  .bar{gap:8px}
+  #search{order:3;flex-basis:100%}
+  .logo{margin-right:auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}
+  .label b{font-size:2.6rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header><div class="wrap bar">
+  <a class="logo" href="#"><i></i>Playshelf</a>
+  <input id="search" type="text" placeholder="Search games and web apps (press /)" aria-label="Search projects">
+  <div class="nav">
+    <button class="btn flat" id="randomBtn" type="button">Surprise me</button>
+    <a class="btn flat" href="#shelf">My shelf</a>
+    <button class="btn flat" id="authBtn" type="button" hidden>Sign in</button>
+    <a class="btn primary" href="#post">Add a project</a>
+  </div>
+</div></header>
+<div id="notice" hidden><div class="wrap" id="noticeText"></div></div>
+
+<main class="wrap">
+  <div id="vBrowse">
+    <section class="hero">
+      <div>
+        <h1>Made something? Put it on the shelf.</h1>
+        <p>Upload an HTML file and it runs right here, or post a link to a web game or app you host elsewhere. Then see what everyone else has been building.</p>
+        <div class="acts"><a class="btn pop" href="#post">Add your project</a></div>
+      </div>
+      <div class="spot" id="spot"></div>
+    </section>
+    <div class="controls">
+      <div class="seg" id="kinds" role="group" aria-label="Project type"></div>
+      <button class="chip" id="phoneOnly" type="button" aria-pressed="false">Works on phones</button>
+      <button class="chip" id="multiOnly" type="button" aria-pressed="false">Multiplayer</button>
+      <button class="chip" id="hereOnly" type="button" aria-pressed="false">Runs here</button>
+      <span class="spacer"></span>
+      <label class="muted" for="sort">Sort</label>
+      <select id="sort"><option value="trending">Trending</option><option value="new">Newest</option><option value="likes">Most liked</option><option value="plays">Most opened</option></select>
+    </div>
+    <div class="seg" id="tagrow"></div>
+    <p class="mono muted" id="count"></p>
+    <div id="list"></div>
+  </div>
+
+  <div id="vDetail" hidden>
+    <a class="back" href="#">Back to the shelf</a>
+    <div class="detail">
+      <div id="dCart"></div>
+      <div class="stack" id="dInfo"></div>
+    </div>
+    <section class="talk">
+      <h2 id="talkTitle">Comments</h2>
+      <form id="cForm"><div class="field">
+        <label for="cText">Add a comment</label>
+        <textarea id="cText" maxlength="600" placeholder="What did you like? Find a bug? Beat a high score?" style="min-height:70px"></textarea>
+      </div><button class="btn" type="submit">Post comment</button> <span class="err" id="cErr" hidden></span></form>
+      <div id="cList" style="margin-top:12px"></div>
+    </section>
+  </div>
+
+  <div id="vPost" hidden>
+    <div class="form">
+      <form id="pForm" novalidate>
+        <h1 id="pTitle">Add a project</h1>
+        <fieldset class="field"><legend>How do you want to share it?</legend><div class="opts">
+          <label><input type="radio" name="fSource" value="html" checked> Upload HTML</label>
+          <label><input type="radio" name="fSource" value="link"> Post a link</label>
+        </div></fieldset>
+        <div id="srcHtml">
+          <div class="field"><label for="fFile">HTML file</label>
+            <div class="drop" id="fDrop"><input id="fFile" type="file" accept=".html,.htm,text/html"><small>Choose a file or drop it here. Up to 2 MB, and images, styles and scripts need to be inside the one file.</small></div>
+          </div>
+          <div class="field"><label for="fCode">Or paste your code</label><textarea id="fCode" class="code" spellcheck="false" placeholder="&lt;!doctype html&gt;..."></textarea></div>
+          <div class="actions" style="margin-bottom:16px"><button class="btn" id="fTry" type="button">Try it</button><span class="mono muted" id="fStatus"></span></div>
+        </div>
+        <div class="field" id="srcLink"><label for="fUrl">Project link</label><input id="fUrl" type="url" maxlength="500" placeholder="https://you.github.io/my-game/" inputmode="url"><small>It has to start with https://, and people need to be able to open it without signing in to anything of yours.</small></div>
+        <div class="field"><label for="fName">Name</label><input id="fName" type="text" maxlength="60"></div>
+        <div class="field"><label for="fTag">One-line pitch</label><input id="fTag" type="text" maxlength="110" placeholder="Stack cats until the tower falls over"></div>
+        <fieldset class="field"><legend>What is it?</legend><div class="opts">
+          <label><input type="radio" name="fKind" value="game" checked> Game</label>
+          <label><input type="radio" name="fKind" value="app"> Web app</label>
+        </div></fieldset>
+        <div class="field"><label for="fDesc">Description <span class="muted">(optional)</span></label><textarea id="fDesc" maxlength="2000" placeholder="How does it work? What are the controls? What are you working on next?"></textarea></div>
+        <div class="field"><label for="fTags">Tags <span class="muted">(optional, up to 5)</span></label><input id="fTags" type="text" maxlength="80" placeholder="puzzle, pixel art, tools"><small>Separate them with commas.</small></div>
+        <fieldset class="field"><legend>How do people use it?</legend><div class="opts" id="fInputs">
+          <label><input type="checkbox" value="keyboard"> Keyboard</label>
+          <label><input type="checkbox" value="mouse"> Mouse</label>
+          <label><input type="checkbox" value="touch"> Touchscreen</label>
+          <label><input type="checkbox" value="gamepad"> Gamepad</label>
+          <label><input type="checkbox" id="fMulti"> Multiplayer</label>
+        </div></fieldset>
+        <div class="field"><span style="font-weight:600">Cartridge colour</span><div class="swatches" id="fPal"></div></div>
+        <div class="field"><span style="font-weight:600">Cartridge pattern</span><div class="swatches" id="fPat"></div></div>
+        <p class="err" id="pErr" hidden></p>
+        <div class="actions"><button class="btn primary" id="pSubmit" type="submit">Publish</button><a class="btn flat" href="#" id="pCancel">Cancel</a></div>
+      </form>
+      <aside class="preview"><span class="eyebrow">Your cartridge</span><div id="pPreview"></div></aside>
+    </div>
+  </div>
+
+  <div id="vShelf" hidden>
+    <div class="shelfsec"><h2>Posted by you</h2><div id="sMine"></div></div>
+    <div class="shelfsec"><h2>Liked</h2><div id="sLiked"></div></div>
+    <div class="shelfsec"><h2>Recently opened</h2><div id="sRecent"></div></div>
+    <div class="shelfsec" id="sAdmin" hidden><h2>Reports</h2><div id="reports"></div></div>
+  </div>
+
+  <div id="vCreator" hidden>
+    <a class="back" href="#">Back to the shelf</a>
+    <p class="eyebrow">Creator</p><h1 id="crName" style="font-size:2.2rem;margin-bottom:18px"></h1><div id="crList"></div>
+  </div>
+</main>
+
+<dialog id="signin"><form id="sForm">
+  <h2>Sign in to Playshelf</h2>
+  <p class="muted" style="margin-bottom:14px">We email you a one-time link, so there is no password to remember.</p>
+  <div class="field"><label for="sName">Display name</label><input id="sName" type="text" maxlength="30"></div>
+  <div class="field"><label for="sEmail">Email</label><input id="sEmail" type="email"></div>
+  <p class="err" id="sErr" hidden></p>
+  <div class="actions"><button class="btn primary" type="submit">Email me a link</button><button class="btn flat" type="button" id="sClose">Close</button></div>
+</form></dialog>
+
+<div id="player" hidden>
+  <div class="pbar"><strong id="plName"></strong><a class="btn" id="plOpen" target="_blank" rel="noopener noreferrer">Open in new tab</a><button class="btn" id="plFull" type="button">Fullscreen</button><button class="btn" id="plClose" type="button">Close</button></div>
+  <small id="plNote"></small>
+</div>
+
+<script>
+"use strict";
+/* ─────────── To run this on your own website, paste your Supabase project's values here. ─────────── */
+const SUPABASE_URL = "";
+const SUPABASE_ANON_KEY = "";
+/* ──────────────────────────────────────────────────────────────────────────────────────────────── */
+
+const $ = id => document.getElementById(id);
+function h(tag, props, ...kids){
+  const el = document.createElement(tag);
+  for (const [k,v] of Object.entries(props||{})){
+    if (v==null||v===false) continue;
+    if (k==="class") el.className=v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2),v);
+    else if (k in el && k!=="list") el[k]=v;
+    else el.setAttribute(k,v);
+  }
+  for (const c of kids.flat()) if (c!=null&&c!==false) el.append(c);
+  return el;
+}
+const newId = () => Array.from(crypto.getRandomValues(new Uint8Array(8)),b=>"abcdefghijkmnpqrstuvwxyz23456789"[b%32]).join("");
+const store = {
+  get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch{return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+};
+function safeUrl(u){
+  try{
+    const x=new URL(String(u).trim());
+    if(x.protocol!=="https:") return null;
+    if(x.username||x.password) return null;
+    const host=x.hostname.toLowerCase();
+    if(host==="localhost"||!host.includes(".")||/^[\d.]+$/.test(host)) return null;
+    return x.href;
+  }catch{return null}
+}
+const hostOf = u => {try{return new URL(u).hostname.replace(/^www\./,"")}catch{return ""}};
+const urlKey = u => {try{const x=new URL(u);return (x.hostname.replace(/^www\./,"")+x.pathname.replace(/\/+$/,"")+x.search).toLowerCase()}catch{return u}};
+const MAX_HTML=2000000, CHUNK=80000, MAX_PARTS=25;
+function chunks(t){const o=[];let i=0;while(i<t.length){let e=Math.min(i+CHUNK,t.length);const c=t.charCodeAt(e-1);if(e<t.length&&c>=0xD800&&c<0xDC00)e--;o.push(t.slice(i,e));i=e}return o.length?o:[""]}
+const sizeText=n=>n>=1e6?(n/1e6).toFixed(1)+" MB":Math.max(1,Math.round(n/1e3))+" KB";
+const INPUTS=["keyboard","mouse","touch","gamepad"];
+function clean(p,owner){
+  if(!p||typeof p!=="object") return null;
+  const source=p.source==="html"?"html":"link";
+  const url=source==="html"?null:safeUrl(p.url), s=(v,n)=>typeof v==="string"?v.trim().slice(0,n):"";
+  const title=s(p.title,60), id=s(p.id,40);
+  if((source==="link"&&!url)||!title||!/^[a-zA-Z0-9-]+$/.test(id)) return null;
+  const num=(v,m)=>Number.isInteger(v)&&v>=0&&v<m?v:0, time=v=>Number.isFinite(+v)?+v:0;
+  return {id,owner:owner??p.owner,source,parts:num(p.parts,MAX_PARTS+1),htmlSize:Math.max(0,+p.htmlSize||0),url,title,tagline:s(p.tagline,110),description:s(p.description,2000),
+    kind:p.kind==="app"?"app":"game",
+    tags:(Array.isArray(p.tags)?p.tags:[]).filter(t=>typeof t==="string").map(t=>t.slice(0,24)).slice(0,5),
+    inputs:(Array.isArray(p.inputs)?p.inputs:[]).filter(i=>INPUTS.includes(i)),
+    multiplayer:!!p.multiplayer,palette:num(p.palette,PALS.length),pattern:num(p.pattern,PATS),
+    createdAt:time(p.createdAt),updatedAt:time(p.updatedAt),hidden:!!p.hidden};
+}
+
+/* ── Cartridge art: generated from a fixed palette and the project id, so no images need hosting ── */
+const PALS=[["#2a3de0","#ffcf33","#7f8dff"],["#e23d4e","#ffe9b0","#ff8f6b"],["#0f8a6d","#d9ff5c","#39c49b"],["#7a2fd0","#ff9be2","#b478ff"],
+            ["#f07a13","#fff1a8","#ffb347"],["#0b7fb5","#b8f3ff","#3cc0ea"],["#23264a","#ff5f8f","#5a62b8"],["#c2267f","#ffd84d","#f46ab4"]];
+const PATS=6;
+function seedOf(s){let x=2166136261;for(const c of String(s)){x^=c.charCodeAt(0);x=Math.imul(x,16777619)}return ()=>{x=Math.imul(x^(x>>>15),2246822519);x=Math.imul(x^(x>>>13),3266489917);x^=x>>>16;return (x>>>0)/4294967296}}
+function coverSVG(palette,pattern,seed){
+  const [a,b,c]=PALS[palette]||PALS[0], r=seedOf(seed); let o="";
+  if(pattern===0){for(let y=0;y<5;y++)for(let x=0;x<8;x++){const v=r();if(v<.42)o+=`<rect x="${x*20}" y="${y*20}" width="20" height="20" fill="${v<.14?b:c}"/>`}}
+  else if(pattern===1){const cx=30+r()*100,cy=20+r()*60;for(let i=8;i>0;i--)o+=`<circle cx="${cx|0}" cy="${cy|0}" r="${i*20}" fill="${i%2?c:a}"/>`;o+=`<circle cx="${cx|0}" cy="${cy|0}" r="11" fill="${b}"/>`}
+  else if(pattern===2){for(let i=-10;i<20;i++){if(i%2===0)o+=`<path d="M${i*16} 0l100 100h16L${i*16+16} 0z" fill="${i%6===0?b:c}"/>`}}
+  else if(pattern===3){for(let y=0;y<6;y++)for(let x=0;x<9;x++){const d=3+r()*7;o+=`<circle cx="${x*20+(y%2?10:0)}" cy="${y*20}" r="${d.toFixed(1)}" fill="${r()<.2?b:c}"/>`}}
+  else if(pattern===4){for(let i=0;i<5;i++){let d=`M0 ${15+i*20}`;for(let x=0;x<=160;x+=20)d+=`q10 ${i%2?-18:18} 20 0`;o+=`<path d="${d}" fill="none" stroke="${i===2?b:c}" stroke-width="6"/>`}}
+  else{let x=0;while(x<160){const w=8+r()*30,hh=20+r()*75;o+=`<rect x="${x.toFixed(0)}" y="${(100-hh).toFixed(0)}" width="${(w-3).toFixed(0)}" height="${hh.toFixed(0)}" fill="${r()<.25?b:c}"/>`;x+=w}}
+  return `<svg viewBox="0 0 160 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="160" height="100" fill="${a}"/>${o}</svg>`;
+}
+
+/* ── App state ── */
+const S={loading:true,projects:[],likes:{},comments:[],plays:{},names:{},reports:[]};
+let me={id:null,isAdmin:false};
+let backend=null;
+const ui={q:"",kind:"all",tag:null,sort:store.get("lk.sort","trending"),phone:false,multi:false,here:false,editing:null,creator:null};
+const recent=()=>store.get("lk.recent",[]);
+const likeCount=id=>(S.likes[id]||[]).length;
+const iLike=id=>!!me.id&&(S.likes[id]||[]).includes(me.id);
+const playCount=id=>S.plays[id]||0;
+const commentCount=id=>S.comments.filter(c=>c.pid===id).length;
+const nameOf=u=>u&&u===me.id?(S.names[u]||"You"):(S.names[u]||"Someone");
+const visible=()=>S.projects.filter(p=>!p.hidden);
+const trend=p=>{const days=(Date.now()-p.createdAt)/864e5;return (1+likeCount(p.id)*3+commentCount(p.id)*2+playCount(p.id)*.5)/Math.pow(Math.max(days,0)+2,1.25)};
+function ago(t){const s=(Date.now()-t)/1000;if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";if(s<2592000)return Math.floor(s/86400)+"d ago";return new Date(t).toLocaleDateString()}
+const plural=(n,w)=>n+" "+w+(n===1?"":"s");
+function say(msg){$("noticeText").textContent=msg;$("notice").hidden=!msg}
+
+function cart(p){
+  const lab=h("div",{class:"label"});
+  lab.innerHTML=coverSVG(p.palette,p.pattern,p.id);   // built only from numbers and the fixed palette
+  lab.append(h("b",{},(p.title.trim()[0]||"?").toUpperCase()),h("span",{class:"kind"},p.kind==="app"?"WEB APP":"GAME"));
+  return h("a",{class:"cart",href:"#p-"+p.id},lab,p.hidden&&h("span",{class:"hid"},"HIDDEN"),
+    h("div",{class:"txt"},h("h3",{},p.title),p.tagline&&h("p",{},p.tagline),
+      h("div",{class:"foot mono"},h("span",{class:"host"},p.source==="html"?"Runs here":hostOf(p.url)),h("span",{},`${likeCount(p.id)} ♥ · ${playCount(p.id)} ▶`))));
+}
+function gridOf(items,emptyText){
+  if(!items.length) return h("p",{class:"muted"},emptyText);
+  return h("div",{class:"grid"},items.map(cart));
+}
+
+/* ── Browse ── */
+function filtered(){
+  const q=ui.q.toLowerCase().trim();
+  let a=visible().filter(p=>{
+    if(ui.kind!=="all"&&p.kind!==ui.kind) return false;
+    if(ui.tag&&!p.tags.includes(ui.tag)) return false;
+    if(ui.phone&&!p.inputs.includes("touch")) return false;
+    if(ui.multi&&!p.multiplayer) return false;
+    if(ui.here&&p.source!=="html") return false;
+    if(q&&![p.title,p.tagline,p.description,p.tags.join(" "),p.source==="link"?hostOf(p.url):"",nameOf(p.owner)].join(" ").toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const by={new:p=>p.createdAt,likes:p=>likeCount(p.id),plays:p=>playCount(p.id),trending:trend}[ui.sort]||trend;
+  return a.sort((x,y)=>by(y)-by(x)||y.createdAt-x.createdAt);
+}
+function renderSpot(){
+  const all=visible(), box=$("spot"); box.replaceChildren();
+  if(!all.length){box.append(h("span",{class:"eyebrow"},"Today's pick"),h("a",{class:"ghost",href:"#post"},S.loading?"Loading the shelf…":"This slot is waiting for the first project. Yours could be it."));return}
+  const sorted=[...all].sort((a,b)=>a.id<b.id?-1:1);
+  const day=Math.floor(Date.now()/864e5);
+  box.append(h("span",{class:"eyebrow"},"Today's pick"),cart(sorted[day%sorted.length]));
+}
+function renderFilters(){
+  const seg=$("kinds"); seg.replaceChildren(...[["all","Everything"],["game","Games"],["app","Web apps"]].map(([v,t])=>
+    h("button",{class:"chip"+(ui.kind===v?" on":""),type:"button",onclick(){ui.kind=v;renderBrowse()}},t)));
+  $("phoneOnly").classList.toggle("on",ui.phone);$("phoneOnly").setAttribute("aria-pressed",ui.phone);
+  $("multiOnly").classList.toggle("on",ui.multi);$("multiOnly").setAttribute("aria-pressed",ui.multi);
+  $("hereOnly").classList.toggle("on",ui.here);$("hereOnly").setAttribute("aria-pressed",ui.here);
+  const counts={};visible().forEach(p=>p.tags.forEach(t=>counts[t]=(counts[t]||0)+1));
+  const tags=Object.keys(counts).sort((a,b)=>counts[b]-counts[a]).slice(0,14);
+  if(ui.tag&&!tags.includes(ui.tag)) tags.unshift(ui.tag);
+  $("tagrow").replaceChildren(...tags.map(t=>h("button",{class:"chip mono"+(ui.tag===t?" on":""),type:"button",onclick(){ui.tag=ui.tag===t?null:t;renderBrowse()}},"#"+t)));
+  $("sort").value=ui.sort;
+}
+function renderBrowse(){
+  renderSpot();renderFilters();
+  const list=$("list"),items=filtered(),total=visible().length;
+  $("count").textContent=S.loading?"":total?`${items.length} of ${plural(total,"project")}`:"";
+  if(S.loading){list.replaceChildren(h("p",{class:"muted"},"Loading the shelf…"));return}
+  if(!total){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"The shelf is empty"),h("p",{class:"muted"},"Add the first game or web app, and it shows up here for everyone."),h("a",{class:"btn pop",href:"#post"},"Add the first project")));return}
+  if(!items.length){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"Nothing matches"),h("p",{class:"muted"},"Try a different search or clear your filters."),h("button",{class:"btn",type:"button",onclick(){Object.assign(ui,{q:"",kind:"all",tag:null,phone:false,multi:false,here:false});$("search").value="";renderBrowse()}},"Clear filters")));return}
+  list.replaceChildren(gridOf(items));
+}
+
+/* ── Detail ── */
+let reportOpen=false, delArm=false;
+function openProject(p){
+  let ss=[];try{ss=JSON.parse(sessionStorage.getItem("lk.opened")||"[]")}catch{}
+  if(!ss.includes(p.id)){ss.push(p.id);try{sessionStorage.setItem("lk.opened",JSON.stringify(ss))}catch{};if(me.id||backend?.anonPlays) backend?.open(p.id).catch(()=>{})}
+  store.set("lk.recent",[p.id,...recent().filter(x=>x!==p.id)].slice(0,12));
+}
+function renderDetail(id){
+  const p=S.projects.find(x=>x.id===id);
+  const info=$("dInfo");
+  if(!p||(p.hidden&&!me.isAdmin&&p.owner!==me.id)){
+    $("dCart").replaceChildren();$("cForm").hidden=true;$("talkTitle").hidden=true;$("cList").replaceChildren();
+    info.replaceChildren(...[h("h1",{},S.loading?"Loading…":"Project not found"),!S.loading&&h("p",{class:"muted"},"It may have been removed by its creator.")].filter(Boolean));return;
+  }
+  $("cForm").hidden=false;$("talkTitle").hidden=false;
+  $("dCart").replaceChildren(cart(p));
+  $("dCart").firstChild.removeAttribute("href");
+  const mine=p.owner&&p.owner===me.id, liked=iLike(p.id), acts=[];
+  const verb=p.kind==="game"?"Play here":"Open here";
+  if(p.source==="html") acts.push(h("button",{class:"btn primary",type:"button",onclick(e){playHtml(p,e.currentTarget)}},verb));
+  else{
+    if(backend?.canEmbed) acts.push(h("button",{class:"btn primary",type:"button",onclick(){play(p)}},verb));
+    acts.push(h("a",{class:"btn "+(backend?.canEmbed?"":"primary"),href:p.url,target:"_blank",rel:"noopener noreferrer",onclick(){openProject(p)}},"Open "+hostOf(p.url)));
+  }
+  acts.push(h("button",{class:"btn"+(liked?" on":""),type:"button","aria-pressed":String(liked),onclick:()=>act(()=>backend.setLike(p.id,!liked))},`${liked?"Liked":"Like"} · ${likeCount(p.id)}`));
+  if(backend?.canEmbed||p.url) acts.push(h("button",{class:"btn flat",type:"button",onclick(e){copyLink(p,e.currentTarget)}},"Copy link"));
+  const owners=[];
+  if(mine) owners.push(h("a",{class:"btn flat",href:"#post",onclick(){ui.editing=p.id}},"Edit"),
+    h("button",{class:"btn flat danger",type:"button",onclick(){if(!delArm){delArm=true;renderDetail(id);return}delArm=false;act(async()=>{await backend.removeProject(p.id);if(p.source==="html")await backend.deleteHtml(p,0)}).then(()=>{location.hash=""})}},delArm?"Click again to delete":"Delete"));
+  if(me.isAdmin) owners.push(h("button",{class:"btn flat danger",type:"button",onclick:()=>act(()=>backend.setHidden("project",p.id,!p.hidden))},p.hidden?"Show again":"Hide from everyone"));
+  if(!mine) owners.push(h("button",{class:"link muted",type:"button",onclick(){reportOpen=!reportOpen;renderDetail(id)}},"Report"));
+  const facts=[["Made by",h("button",{class:"link",type:"button",onclick(){showCreator(p.owner)}},nameOf(p.owner))],
+    ["Posted",ago(p.createdAt)+(p.updatedAt>p.createdAt+6e4?` · updated ${ago(p.updatedAt)}`:"")],
+    ["Opened",plural(playCount(p.id),"time")],
+    p.source==="html"&&["Size",sizeText(p.htmlSize)],
+    p.inputs.length&&["Works with",p.inputs.map(i=>i==="touch"?"touchscreen":i).join(", ")],
+    p.multiplayer&&["Players","Multiplayer"]].filter(Boolean);
+  info.replaceChildren(...[
+    h("span",{class:"eyebrow"},p.kind==="app"?"Web app":"Game"),
+    h("h1",{},p.title),
+    p.tagline&&h("p",{style:"font-size:1.15rem"},p.tagline),
+    h("div",{class:"actions"},acts),
+    p.description&&h("p",{class:"desc"},p.description),
+    p.tags.length&&h("div",{class:"tags"},p.tags.map(t=>h("button",{class:"chip",type:"button",onclick(){ui.tag=t;location.hash=""}},"#"+t))),
+    h("dl",{class:"facts"},facts.flatMap(([a,b])=>[h("dt",{},a),h("dd",{},b)])),
+    h("div",{class:"actions"},owners),
+    reportOpen&&h("div",{class:"opts"},["Doesn't work","Harmful or unsafe","Asks for passwords or personal info","Spam","Stolen work"].map(r=>h("button",{class:"chip",type:"button",onclick(){reportOpen=false;act(()=>backend.report(p.id,r)).then(ok=>{if(ok)say("Thanks. Your report was sent to the site's moderators.");setTimeout(()=>say(""),4000)})}},r)))
+  ].filter(Boolean));
+  const cs=S.comments.filter(c=>c.pid===id).sort((a,b)=>b.createdAt-a.createdAt);
+  $("talkTitle").textContent=plural(cs.length,"comment");
+  $("cList").replaceChildren(...cs.map(c=>h("div",{class:"cmt"},
+    h("div",{class:"meta"},h("strong",{},nameOf(c.author)),h("span",{class:"muted"},ago(c.createdAt)),
+      (c.author===me.id||me.isAdmin)&&h("button",{class:"link",type:"button",onclick:()=>act(()=>c.author===me.id?backend.removeComment(c):backend.setHidden("comment",c.id,true))},"Remove")),
+    h("p",{},c.text))));
+}
+async function copyLink(p,btn){
+  const link=backend?.canEmbed?location.href.split("#")[0]+"#p-"+p.id:p.url;
+  try{await navigator.clipboard.writeText(link);btn.textContent="Copied"}catch{btn.textContent=link}
+  setTimeout(()=>{btn.textContent="Copy link"},2000);
+}
+let frame=null,frameProject=null,frameTimer=null;
+function mountFrame(sandbox){
+  frame?.remove();
+  frame=h("iframe",{title:"Project player"});
+  frame.setAttribute("allow","fullscreen; gamepad; autoplay");
+  frame.setAttribute("sandbox",sandbox);
+  $("player").insertBefore(frame,$("plNote"));
+  return frame;
+}
+function play(p){
+  openProject(p);frameProject=null;
+  $("plName").textContent=p.title;$("plOpen").href=p.url;$("plOpen").hidden=false;
+  $("plNote").textContent="Blank screen? Some sites refuse to run inside other pages. Use Open in new tab instead.";
+  mountFrame("allow-scripts allow-same-origin allow-forms allow-popups allow-pointer-lock allow-modals").src=p.url;
+  $("player").hidden=false;document.body.style.overflow="hidden";
+}
+/* Uploaded code runs with no origin of its own, so it can't read this site's data or anyone's sign-in.
+   This small script stands in for browser storage, which sandboxed pages don't get, and hands saves to the parent page. */
+function prepareHtml(html,saved){
+  const shim=`<script>(function(){var d=${JSON.stringify(saved||{}).replace(/</g,"\\u003c")},t;
+function mk(m,keep){function sv(){if(!keep)return;clearTimeout(t);t=setTimeout(function(){parent.postMessage({ps:"save",data:m},"*")},300)}
+return new Proxy({getItem:function(k){k=String(k);return Object.prototype.hasOwnProperty.call(m,k)?m[k]:null},setItem:function(k,v){m[String(k)]=String(v);sv()},removeItem:function(k){delete m[String(k)];sv()},clear:function(){for(var k in m)delete m[k];sv()},key:function(i){return Object.keys(m)[i]||null},get length(){return Object.keys(m).length}},
+{get:function(o,k){return k in o?o[k]:(typeof k==="string"?o.getItem(k):undefined)},set:function(o,k,v){o.setItem(k,v);return true},deleteProperty:function(o,k){o.removeItem(k);return true},ownKeys:function(){return Object.keys(m)},getOwnPropertyDescriptor:function(o,k){return k in m?{value:m[k],enumerable:true,configurable:true}:undefined}})}
+try{Object.defineProperty(window,"localStorage",{value:mk(d,true)});Object.defineProperty(window,"sessionStorage",{value:mk({},false)});
+var c="";Object.defineProperty(document,"cookie",{get:function(){return c},set:function(){}})}catch(e){}
+parent.postMessage({ps:"ready"},"*")})();<\/script>`;
+  const m=html.match(/^\s*<!doctype[^>]*>/i);
+  return m?m[0]+shim+html.slice(m[0].length):shim+html;
+}
+function runHtml(title,html,saveKey,by){
+  frameProject=saveKey;
+  $("plName").textContent=title;$("plOpen").hidden=true;
+  $("plNote").textContent=(by?`Uploaded by ${by}. `:"")+"Never type a password or personal details into a project.";
+  const f=mountFrame("allow-scripts allow-forms allow-pointer-lock allow-modals");
+  f.srcdoc=prepareHtml(html,saveKey?store.get(saveKey,{}):{});
+  clearTimeout(frameTimer);
+  frameTimer=setTimeout(()=>{$("plNote").textContent="This project hasn't started. If the screen stays blank, this view may not allow uploaded projects to run."},5000);
+  $("player").hidden=false;document.body.style.overflow="hidden";
+}
+async function playHtml(p,btn){
+  const txt=btn.textContent;btn.disabled=true;btn.textContent="Loading…";
+  try{const html=await backend.loadHtml(p);openProject(p);runHtml(p.title,html,"lk.save."+p.id,nameOf(p.owner))}
+  catch(e){say(e?.friendly||"This project's file couldn't be loaded. Check your connection and try again.")}
+  btn.disabled=false;btn.textContent=txt;
+}
+addEventListener("message",e=>{
+  if(!frame||e.source!==frame.contentWindow||!e.data) return;
+  if(e.data.ps==="ready") clearTimeout(frameTimer);
+  if(e.data.ps==="save"&&frameProject&&e.data.data&&typeof e.data.data==="object"){
+    try{const j=JSON.stringify(e.data.data);if(j.length<=200000)store.set(frameProject,e.data.data)}catch{}
+  }
+});
+function closePlayer(){clearTimeout(frameTimer);frame?.remove();frame=null;frameProject=null;$("player").hidden=true;document.body.style.overflow="";if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+function showCreator(u){ui.creator=u;if(location.hash==="#creator")route();else location.hash="creator"}
+async function act(fn){
+  if(!me.id&&backend?.signIn){$("signin").showModal();return false}
+  if(!me.id){say("You can browse here, but this view can't post, like or comment. Ask the site's owner for access.");return false}
+  try{await fn();return true}catch(e){say(writeError(e));return false}
+}
+function writeError(e){
+  if(e?.code==="invalid_argument"||e?.code==="42501") return "You can browse here, but your access doesn't include posting, liking or commenting. Ask the site's owner for Contributor access.";
+  if(e?.code==="quota_exceeded") return "The shelf has reached its storage limit, so this wasn't saved. Older entries need removing first.";
+  if(e?.code==="revoked") return "Your access to this page changed. Reload to see what you can still do.";
+  return e?.message?`That didn't save: ${e.message}`:"That didn't save. Check your connection and try again.";
+}
+
+/* ── Post form ── */
+const form={palette:0,pattern:0,previewId:newId(),html:null};
+function currentHtml(){return $("fCode").value.trim()?$("fCode").value:form.html}
+function sourceChanged(){const html=document.querySelector('input[name=fSource]:checked').value==="html";$("srcHtml").hidden=!html;$("srcLink").hidden=html}
+function updateStatus(){
+  const t=currentHtml(), old=ui.editing&&S.projects.find(p=>p.id===ui.editing);
+  $("fStatus").textContent=t?`${sizeText(t.length)} ready`:(old?.source==="html"?`Keeping your current file (${sizeText(old.htmlSize)})`:"No file yet");
+  $("fTry").disabled=!t;
+}
+async function takeFile(file){
+  if(!file) return;
+  const err=m=>{$("pErr").textContent=m;$("pErr").hidden=false};
+  if(!/\.html?$/i.test(file.name)&&file.type!=="text/html") return err("That isn't an HTML file. Choose a file that ends in .html.");
+  if(file.size>MAX_HTML*4) return err("That file is too big. The limit is 2 MB.");
+  form.html=await file.text();$("fCode").value="";$("pErr").hidden=true;
+  if(!$("fName").value.trim()){const n=new DOMParser().parseFromString(form.html,"text/html").title.trim().slice(0,60);$("fName").value=n||file.name.replace(/\.html?$/i,"").slice(0,60)}
+  updateStatus();renderPreview();
+}
+function formData(){
+  return {source:document.querySelector('input[name=fSource]:checked').value,url:$("fUrl").value.trim(),title:$("fName").value.trim(),tagline:$("fTag").value.trim(),description:$("fDesc").value.trim(),
+    kind:document.querySelector('input[name=fKind]:checked').value,
+    tags:[...new Set($("fTags").value.split(",").map(t=>t.trim().toLowerCase().replace(/^#/,"").replace(/\s+/g," ")).filter(Boolean))].slice(0,5),
+    inputs:[...$("fInputs").querySelectorAll("input[value]:checked")].map(i=>i.value).filter(i=>INPUTS.includes(i)),
+    multiplayer:$("fMulti").checked,palette:form.palette,pattern:form.pattern};
+}
+function renderSwatches(){
+  $("fPal").replaceChildren(...PALS.map((c,i)=>{const b=h("button",{class:"swatch",type:"button","aria-pressed":String(form.palette===i),"aria-label":"Colour "+(i+1),onclick(){form.palette=i;renderSwatches();renderPreview()}});b.innerHTML=coverSVG(i,form.pattern,"s");return b}));
+  $("fPat").replaceChildren(...Array.from({length:PATS},(_,i)=>{const b=h("button",{class:"swatch",type:"button","aria-pressed":String(form.pattern===i),"aria-label":"Pattern "+(i+1),onclick(){form.pattern=i;renderSwatches();renderPreview()}});b.innerHTML=coverSVG(form.palette,i,"s");return b}));
+}
+function renderPreview(){
+  const d=formData();
+  const p={...d,id:form.previewId,title:d.title||"Your project",url:safeUrl(d.url)||"https://your-link.example",tagline:d.tagline||"Your one-line pitch goes here"};
+  $("pPreview").replaceChildren(cart(p));
+}
+function fillForm(p){
+  document.querySelector(`input[name=fSource][value=${p&&p.source==="link"?"link":"html"}]`).checked=true;
+  form.html=null;$("fFile").value="";$("fCode").value="";sourceChanged();updateStatus();
+  $("fUrl").value=p?.url||"";$("fName").value=p?.title||"";$("fTag").value=p?.tagline||"";$("fDesc").value=p?.description||"";$("fTags").value=(p?.tags||[]).join(", ");
+  document.querySelector(`input[name=fKind][value=${p?.kind==="app"?"app":"game"}]`).checked=true;
+  $("fInputs").querySelectorAll("input[value]").forEach(i=>{i.checked=!!p?.inputs.includes(i.value)});$("fMulti").checked=!!p?.multiplayer;
+  form.palette=p?p.palette:Math.floor(Math.random()*PALS.length);form.pattern=p?p.pattern:Math.floor(Math.random()*PATS);form.previewId=p?.id||newId();
+  $("pTitle").textContent=p?"Edit your project":"Add a project";$("pSubmit").textContent=p?"Save changes":"Publish";$("pErr").hidden=true;
+  renderSwatches();renderPreview();
+}
+async function submitPost(e){
+  e.preventDefault();
+  const d=formData(), err=m=>{$("pErr").textContent=m;$("pErr").hidden=false};
+  const isHtml=d.source==="html", url=isHtml?null:safeUrl(d.url), code=isHtml?currentHtml():null;
+  const old=ui.editing?S.projects.find(p=>p.id===ui.editing):null;
+  if(isHtml){
+    if(!code&&old?.source!=="html") return err("Choose an HTML file or paste your code.");
+    if(code&&code.length>MAX_HTML) return err(`That file is ${sizeText(code.length)}, and the limit is 2 MB. Try compressing images or moving large files to a link.`);
+    if(code&&!/<[a-z!]/i.test(code)) return err("That doesn't look like HTML. Check the file and try again.");
+  } else {
+    if(!url) return err("Enter a full public link that starts with https://, such as https://you.github.io/my-game/");
+    const dup=S.projects.find(p=>p.url&&urlKey(p.url)===urlKey(url)&&p.id!==ui.editing);
+    if(dup) return err(`That link is already on the shelf as "${dup.title}".`);
+  }
+  if(!d.title) return err("Give your project a name.");
+  const file=code?{parts:chunks(code).length,htmlSize:code.length}:{};
+  $("pSubmit").disabled=true;
+  try{
+    if(old){
+      const id=old.id;
+      const ok=await act(async()=>{
+        if(code) await backend.saveHtml(id,code,old.source==="html"?old.parts:0);
+        await backend.updateProject(id,{...old,...d,url,...file,parts:isHtml?(file.parts??old.parts):0,htmlSize:isHtml?(file.htmlSize??old.htmlSize):0,updatedAt:Date.now()});
+        if(!isHtml&&old.source==="html") await backend.deleteHtml(old,0);
+      });
+      if(ok){ui.editing=null;location.hash="p-"+id}
+      return;
+    }
+    const mineRecent=S.projects.filter(p=>p.owner===me.id&&Date.now()-p.createdAt<36e5).length;
+    if(mineRecent>=10) return err("You've added 10 projects in the last hour. Try again a little later.");
+    const now=Date.now(), id=form.previewId;
+    const ok=await act(async()=>{
+      await backend.addProject({...d,id,url,parts:0,htmlSize:0,...file,createdAt:now,updatedAt:now});
+      if(code){try{await backend.saveHtml(id,code,0)}catch(e){await backend.removeProject(id).catch(()=>{});throw e}}
+    });
+    if(ok) location.hash="p-"+id;
+  }finally{$("pSubmit").disabled=false}
+}
+
+/* ── Shelf ── */
+function renderShelf(){
+  const ps=S.projects;
+  $("sMine").replaceChildren(gridOf(ps.filter(p=>p.owner&&p.owner===me.id).sort((a,b)=>b.createdAt-a.createdAt),"You haven't posted anything yet."));
+  $("sLiked").replaceChildren(gridOf(visible().filter(p=>iLike(p.id)),"Projects you like will collect here."));
+  $("sRecent").replaceChildren(gridOf(recent().map(id=>visible().find(p=>p.id===id)).filter(Boolean),"Projects you open will show up here."));
+  $("sAdmin").hidden=!me.isAdmin;
+  if(me.isAdmin){
+    $("reports").replaceChildren(...(S.reports.length?S.reports:[null]).map(r=>{
+      if(!r) return h("p",{class:"muted"},"No reports. All clear.");
+      const p=S.projects.find(x=>x.id===r.pid);
+      return h("div",{class:"row"},h("a",{href:"#p-"+r.pid},p?p.title:"(removed project)"),h("span",{},r.reason),h("span",{class:"muted"},ago(r.createdAt)));
+    }));
+  }
+}
+
+/* ── Routing ── */
+const VIEWS=["vBrowse","vDetail","vPost","vShelf","vCreator"];
+function show(v){VIEWS.forEach(x=>{$(x).hidden=x!==v})}
+let lastHash=null;
+function route(){
+  const hash=location.hash.slice(1);
+  const changed=hash!==lastHash; lastHash=hash;
+  if(hash==="post"){
+    show("vPost");
+    if(changed) fillForm(ui.editing?S.projects.find(p=>p.id===ui.editing&&p.owner===me.id):null);
+  }
+  else{
+    if(changed&&hash!=="post") ui.editing=null;
+    if(hash.startsWith("p-")){show("vDetail");if(changed){reportOpen=false;delArm=false;scrollTo(0,0);$("cErr").hidden=true}renderDetail(hash.slice(2))}
+    else if(hash==="shelf"){show("vShelf");renderShelf()}
+    else if(hash==="creator"&&ui.creator){show("vCreator");$("crName").textContent=nameOf(ui.creator);$("crList").replaceChildren(gridOf(visible().filter(p=>p.owner===ui.creator).sort((a,b)=>b.createdAt-a.createdAt),"Nothing posted yet."))}
+    else{show("vBrowse");renderBrowse()}
+  }
+}
+let queued=false;
+function refresh(){ if(queued) return; queued=true; requestAnimationFrame(()=>{queued=false;route();if(backend?.resolveNames) backend.resolveNames()}); }
+
+/* ── Backend 1: Claude artifact shared database. Each person writes only their own documents. ── */
+async function artifactBackend(db,user){
+  const uid=user?await user.id():null;
+  me={id:uid,isAdmin:user?await user.isOwner():false};
+  const raw={projects:[],likes:[],comments:[],plays:[],mod:{projects:[],comments:[]},reports:[]};
+  const seen=new Set();
+  function rebuild(){
+    const hide=new Set(raw.mod.projects), hideC=new Set(raw.mod.comments), byId=new Map();
+    raw.projects.forEach(d=>{(d.data().items||[]).forEach(i=>{
+      const p=clean(i,d.id); if(!p) return;
+      p.hidden=hide.has(p.id);
+      const old=byId.get(p.id); if(!old||p.createdAt<old.createdAt) byId.set(p.id,p);
+    })});
+    S.projects=[...byId.values()];
+    const likes={}; raw.likes.forEach(d=>{const ids=d.data().ids;(Array.isArray(ids)?ids:[]).forEach(id=>{(likes[id]=likes[id]||[]).push(d.id)})}); S.likes=likes;
+    const plays={}; raw.plays.forEach(d=>{const c=d.data().counts||{};Object.keys(c).forEach(k=>{if(c[k]>0)plays[k]=(plays[k]||0)+Math.min(1,+c[k]||0)})}); S.plays=plays;
+    S.comments=raw.comments.flatMap(d=>(d.data().items||[]).filter(c=>c&&typeof c.text==="string"&&!hideC.has(c.id)).map(c=>({id:String(c.id),pid:String(c.pid),author:d.id,text:c.text.slice(0,600),createdAt:+c.createdAt||0})));
+    S.reports=raw.reports.flatMap(d=>(d.data().items||[])).sort((a,b)=>b.createdAt-a.createdAt);
+    refresh();
+  }
+  let q=Promise.resolve();
+  const mutate=(path,fn)=>{const run=q.then(async()=>{const ref=db.doc(path);const snap=await ref.get();const cur=snap.exists?{...snap.data()}:{};await ref.set(fn(cur))});q=run.catch(()=>{});return run};
+  const items=c=>Array.isArray(c.items)?[...c.items]:[];
+  const stop=e=>{if(e?.code!=="unavailable")say(writeError(e))};
+  let pending=4; const timer=setTimeout(()=>{if(S.loading){S.loading=false;say("The shelf can't be reached right now, so what you see may be out of date.");refresh()}},10000);
+  const col=(name,key)=>{let first=true;db.collection(name).limit(1000).onSnapshot(s=>{raw[key]=s.docs;if(first&&!s.metadata.fromCache){first=false;if(--pending===0){clearTimeout(timer);S.loading=false;}}rebuild()},e=>{stop(e);if(first){first=false;if(--pending===0){clearTimeout(timer);S.loading=false;refresh()}}})};
+  col("projects","projects");col("likes","likes");col("comments","comments");col("plays","plays");
+  db.doc("mod/state").onSnapshot(s=>{const d=s.data()||{};raw.mod={projects:d.projects||[],comments:d.comments||[]};rebuild()},()=>{});
+  if(me.isAdmin) col2();
+  function col2(){db.collection("reports").limit(500).onSnapshot(s=>{raw.reports=s.docs;rebuild()},()=>{})}
+  return {
+    canEmbed:false,
+    async saveHtml(id,html,oldParts){const c=chunks(html);for(let i=0;i<c.length;i++)await db.doc(`projects/${uid}/files/${id}-${i}`).set({c:c[i]});for(let i=c.length;i<oldParts;i++)await db.doc(`projects/${uid}/files/${id}-${i}`).delete()},
+    async loadHtml(p){const all=await Promise.all(Array.from({length:p.parts},(_,i)=>db.doc(`projects/${p.owner}/files/${p.id}-${i}`).get()));if(!p.parts||all.some(x=>!x.exists))throw {friendly:"This project's file is missing. Its creator may need to upload it again."};return all.map(x=>x.data().c).join("")},
+    async deleteHtml(p,from){for(let i=from;i<p.parts;i++)await db.doc(`projects/${uid}/files/${p.id}-${i}`).delete()},
+    addProject:p=>mutate("projects/"+uid,c=>({items:[...items(c),{...p}]})),
+    updateProject:(id,p)=>mutate("projects/"+uid,c=>({items:items(c).map(x=>x.id===id?{...p,owner:undefined,hidden:undefined}:x)})),
+    removeProject:id=>mutate("projects/"+uid,c=>({items:items(c).filter(x=>x.id!==id)})),
+    setLike:(id,on)=>mutate("likes/"+uid,c=>{const ids=(c.ids||[]).filter(x=>x!==id);if(on)ids.push(id);return {ids}}),
+    addComment:(pid,text)=>mutate("comments/"+uid,c=>({items:[...items(c),{id:newId(),pid,text,createdAt:Date.now()}].slice(-300)})),
+    removeComment:cm=>mutate("comments/"+uid,c=>({items:items(c).filter(x=>x.id!==cm.id)})),
+    open:id=>mutate("plays/"+uid,c=>({counts:{...(c.counts||{}),[id]:1}})),
+    report:(pid,reason)=>mutate("reports/"+uid,c=>({items:[...items(c),{pid,reason,createdAt:Date.now()}].slice(-50)})),
+    setHidden:(kind,id,on)=>mutate("mod/state",c=>{const key=kind==="project"?"projects":"comments";const l=(c[key]||[]).filter(x=>x!==id);if(on)l.push(id);return {...c,[key]:l}}),
+    async resolveNames(){
+      if(!user) return;
+      const ids=[...new Set([...S.projects.map(p=>p.owner),...S.comments.map(c=>c.author)].filter(Boolean))];
+      if(!ids.length||ids.every(i=>seen.has(i))) return;
+      const ps=await user.profiles(ids);let ch=false;
+      ids.forEach(i=>{seen.add(i);if(ps[i]?.name&&S.names[i]!==ps[i].name){S.names[i]=ps[i].name;ch=true}});
+      if(ch) route();
+    }
+  };
+}
+
+/* ── Backend 2: Supabase, for your own public website. Tables are in supabase-setup.sql. ── */
+async function supabaseBackend(){
+  await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";s.onload=ok;s.onerror=no;document.head.append(s)});
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const must=({error,data})=>{if(error)throw error;return data};
+  async function session(){
+    const {data:{session:se}}=await sb.auth.getSession();
+    me={id:se?.user?.id||null,isAdmin:false};
+    if(me.id){
+      const pending=store.get("lk.pendingName",null);
+      if(pending){await sb.from("profiles").upsert({id:me.id,name:pending});store.set("lk.pendingName",null)}
+      const {data}=await sb.from("admins").select("user_id").eq("user_id",me.id).maybeSingle();
+      me.isAdmin=!!data;
+    }
+    $("authBtn").hidden=false;$("authBtn").textContent=me.id?"Sign out":"Sign in";
+  }
+  async function load(){
+    const [pr,li,co,pl,na]=await Promise.all([sb.from("projects").select("*").limit(2000),sb.from("likes").select("project_id,user_id").limit(20000),sb.from("comments").select("*").eq("hidden",false).limit(5000),sb.from("plays").select("*").limit(2000),sb.from("profiles").select("*").limit(5000)]);
+    S.projects=must(pr).map(r=>clean({...r,htmlSize:r.html_size,parts:r.source==="html"?1:0,createdAt:Date.parse(r.created_at),updatedAt:Date.parse(r.updated_at)},r.owner)).filter(Boolean);
+    const likes={};must(li).forEach(r=>{(likes[r.project_id]=likes[r.project_id]||[]).push(r.user_id)});S.likes=likes;
+    S.comments=must(co).map(r=>({id:r.id,pid:r.project_id,author:r.author,text:r.body,createdAt:Date.parse(r.created_at)}));
+    const plays={};must(pl).forEach(r=>{plays[r.project_id]=r.count});S.plays=plays;
+    const names={};must(na).forEach(r=>{names[r.id]=r.name});S.names=names;
+    if(me.isAdmin){const {data}=await sb.from("reports").select("*").order("created_at",{ascending:false}).limit(200);S.reports=(data||[]).map(r=>({pid:r.project_id,reason:r.reason,createdAt:Date.parse(r.created_at)}))}
+    S.loading=false;refresh();
+  }
+  let t=null;const soon=()=>{clearTimeout(t);t=setTimeout(()=>load().catch(e=>say(writeError(e))),250)};
+  await session();
+  sb.auth.onAuthStateChange(()=>{setTimeout(()=>session().then(soon),0)});
+  sb.channel("playshelf").on("postgres_changes",{event:"*",schema:"public"},soon).subscribe();
+  setInterval(soon,6e4);
+  await load();
+  const row=p=>({source:p.source,html_size:p.htmlSize||0,url:p.url,title:p.title,tagline:p.tagline,description:p.description,kind:p.kind,tags:p.tags,inputs:p.inputs,multiplayer:p.multiplayer,palette:p.palette,pattern:p.pattern});
+  const done=async r=>{must(await r);soon()};
+  return {
+    canEmbed:true,anonPlays:true,
+    saveHtml:(id,html)=>done(sb.from("project_files").upsert({project_id:id,html})),
+    async loadHtml(p){const d=must(await sb.from("project_files").select("html").eq("project_id",p.id).maybeSingle());if(!d)throw {friendly:"This project's file is missing. Its creator may need to upload it again."};return d.html},
+    deleteHtml:p=>done(sb.from("project_files").delete().eq("project_id",p.id)),
+    async signIn(email,name){store.set("lk.pendingName",name);must(await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.href.split("#")[0]}}))},
+    signOut:()=>sb.auth.signOut(),
+    addProject:p=>done(sb.from("projects").insert({...row(p),id:p.id,owner:me.id})),
+    updateProject:(id,p)=>done(sb.from("projects").update(row(p)).eq("id",id)),
+    removeProject:id=>done(sb.from("projects").delete().eq("id",id)),
+    setLike:(id,on)=>done(on?sb.from("likes").insert({project_id:id,user_id:me.id}):sb.from("likes").delete().eq("project_id",id).eq("user_id",me.id)),
+    addComment:(pid,text)=>done(sb.from("comments").insert({project_id:pid,author:me.id,body:text})),
+    removeComment:c=>done(sb.from("comments").delete().eq("id",c.id)),
+    open:id=>done(sb.rpc("bump_play",{pid:id})),
+    report:(pid,reason)=>done(sb.from("reports").insert({project_id:pid,reporter:me.id,reason})),
+    setHidden:(kind,id,on)=>done(sb.from(kind==="project"?"projects":"comments").update({hidden:on}).eq("id",id))
+  };
+}
+
+/* ── Backend 3: Practice mode. Everything stays in this browser until Supabase is set up. ── */
+function localBackend(){
+  me={id:"local",isAdmin:true};
+  const d=store.get("lk.local",{projects:[],likes:[],comments:[],plays:{},hidden:[]});
+  S.names={local:"You"};
+  const sync=()=>{store.set("lk.local",d);S.projects=d.projects.map(p=>{const x=clean(p,"local");if(x)x.hidden=d.hidden.includes(x.id);return x}).filter(Boolean);
+    S.likes=Object.fromEntries(d.likes.map(i=>[i,["local"]]));S.comments=d.comments;S.plays=d.plays;S.loading=false;refresh()};
+  sync();
+  const go=fn=>async(...a)=>{fn(...a);sync()};
+  return {
+    canEmbed:location.protocol!=="about:",
+    async saveHtml(id,html){try{localStorage.setItem("lk.file."+id,html)}catch{throw new Error("this browser has no room for that file in practice mode")}},
+    async loadHtml(p){const t=store.get===undefined?null:(()=>{try{return localStorage.getItem("lk.file."+p.id)}catch{return null}})();if(t==null)throw {friendly:"This project's file is missing."};return t},
+    async deleteHtml(p){try{localStorage.removeItem("lk.file."+p.id)}catch{}},
+    addProject:go(p=>d.projects.push(p)),
+    updateProject:go((id,p)=>{d.projects=d.projects.map(x=>x.id===id?p:x)}),
+    removeProject:go(id=>{d.projects=d.projects.filter(x=>x.id!==id)}),
+    setLike:go((id,on)=>{d.likes=d.likes.filter(x=>x!==id);if(on)d.likes.push(id)}),
+    addComment:go((pid,text)=>d.comments.push({id:newId(),pid,author:"local",text,createdAt:Date.now()})),
+    removeComment:go(c=>{d.comments=d.comments.filter(x=>x.id!==c.id)}),
+    open:go(id=>{d.plays[id]=(d.plays[id]||0)+1}),
+    report:go(()=>{}),
+    setHidden:go((k,id,on)=>{if(k==="project"){d.hidden=d.hidden.filter(x=>x!==id);if(on)d.hidden.push(id)}else d.comments=d.comments.filter(x=>x.id!==id)})
+  };
+}
+
+/* ── Wiring ── */
+$("search").addEventListener("input",e=>{ui.q=e.target.value;if(location.hash&&location.hash!=="#")location.hash="";else renderBrowse()});
+$("sort").addEventListener("change",e=>{ui.sort=e.target.value;store.set("lk.sort",ui.sort);renderBrowse()});
+$("phoneOnly").addEventListener("click",()=>{ui.phone=!ui.phone;renderBrowse()});
+$("multiOnly").addEventListener("click",()=>{ui.multi=!ui.multi;renderBrowse()});
+$("hereOnly").addEventListener("click",()=>{ui.here=!ui.here;renderBrowse()});
+$("randomBtn").addEventListener("click",()=>{const a=visible();if(!a.length){location.hash="post";return}const cur=location.hash.slice(3);const pool=a.length>1?a.filter(p=>p.id!==cur):a;location.hash="p-"+pool[Math.floor(Math.random()*pool.length)].id});
+$("pForm").addEventListener("submit",submitPost);
+$("pForm").addEventListener("input",e=>{if(e.target.id==="fCode")updateStatus();renderPreview()});
+$("pForm").addEventListener("change",e=>{if(e.target.name==="fSource"){sourceChanged();$("pErr").hidden=true}if(e.target.id==="fFile")takeFile(e.target.files[0])});
+["dragover","dragenter"].forEach(n=>$("fDrop").addEventListener(n,e=>{e.preventDefault();$("fDrop").classList.add("over")}));
+["dragleave","drop"].forEach(n=>$("fDrop").addEventListener(n,()=>$("fDrop").classList.remove("over")));
+$("fDrop").addEventListener("drop",e=>{e.preventDefault();takeFile(e.dataTransfer.files[0])});
+$("fTry").addEventListener("click",()=>{const t=currentHtml();if(t)runHtml($("fName").value.trim()||"Test run",t,null,"")});
+$("cForm").addEventListener("submit",async e=>{
+  e.preventDefault();const t=$("cText").value.trim();if(!t) return;
+  const pid=location.hash.slice(3);
+  if(await act(()=>backend.addComment(pid,t))) $("cText").value="";
+});
+$("plClose").addEventListener("click",closePlayer);
+$("plFull").addEventListener("click",()=>{$("player").requestFullscreen?.().catch(()=>{})});
+$("authBtn").addEventListener("click",()=>{if(me.id)backend.signOut();else $("signin").showModal()});
+$("sClose").addEventListener("click",()=>$("signin").close());
+$("sForm").addEventListener("submit",async e=>{
+  e.preventDefault();const em=$("sEmail").value.trim(),n=$("sName").value.trim(),er=$("sErr");
+  if(!n||!/.+@.+\..+/.test(em)){er.textContent="Enter a display name and your email address.";er.hidden=false;return}
+  try{await backend.signIn(em,n.slice(0,30));$("signin").close();say(`Check ${em} for your sign-in link.`)}catch(x){er.textContent=x.message||"The link couldn't be sent. Try again.";er.hidden=false}
+});
+addEventListener("hashchange",route);
+addEventListener("keydown",e=>{
+  if(e.target.matches("input,textarea,select")) {if(e.key==="Escape")e.target.blur();return}
+  if(e.key==="/"){e.preventDefault();$("search").focus()}
+  if(e.key==="Escape"&&!$("player").hidden) closePlayer();
+});
+renderBrowse();route();
+
+(async function start(){
+  try{
+    if(SUPABASE_URL&&SUPABASE_ANON_KEY){backend=await supabaseBackend();refresh();return}
+    if(window.claude?.use){
+      const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
+      if(db){backend=await artifactBackend(db,user);refresh();return}
+      backend=localBackend();
+      say("The shared shelf isn't available in this view. Anything you post here stays in this browser.");
+      refresh();return;
+    }
+    backend=localBackend();
+    say("Practice mode: posts stay in this browser until you add your Supabase keys.");
+    refresh();
+  }catch(e){
+    S.loading=false;backend=localBackend();say("The shelf couldn't connect, so this is a practice copy that stays in your browser. Reload to try again.");refresh();
+  }
+})();
+</script>
+</body>
+</html>
