@@ -168,6 +168,13 @@ create policy "replace own file" on public.project_files for update to authentic
 create policy "delete own file" on public.project_files for delete to authenticated
   using (exists (select 1 from public.projects p where p.id = project_id and p.owner = auth.uid()));
 
+-- Lets the website reach these tables. The row rules above still decide what each person can do.
+grant usage on schema public to anon, authenticated;
+grant select on public.profiles, public.projects, public.likes, public.comments, public.plays, public.project_files to anon, authenticated;
+grant select on public.admins, public.reports to authenticated;
+grant insert, update, delete on public.profiles, public.projects, public.likes, public.comments, public.project_files to authenticated;
+grant insert on public.reports to authenticated;
+
 alter publication supabase_realtime add table public.projects, public.likes, public.comments, public.plays;
 
 -- After signing in to your site once, find your user id under Authentication > Users, then run:
