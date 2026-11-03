@@ -288,8 +288,8 @@ dialog h2{font-size:1.4rem;margin-bottom:12px}
 <script>
 "use strict";
 /* ─────────── To run this on your own website, paste your Supabase project's values here. ─────────── */
-const SUPABASE_URL = "";
-const SUPABASE_ANON_KEY = "";
+const SUPABASE_URL = "https://ggfwjssslvhevlvpwpcy.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_u-F6453715YruPnrKChn8Q_0DfD8E6s";
 /* ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const $ = id => document.getElementById(id);
@@ -735,7 +735,7 @@ async function artifactBackend(db,user){
 
 /* ── Backend 2: Supabase, for your own public website. Tables are in supabase-setup.sql. ── */
 async function supabaseBackend(){
-  await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js";s.onload=ok;s.onerror=no;document.head.append(s)});
+  await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";s.onload=ok;s.onerror=no;document.head.append(s)});
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   const must=({error,data})=>{if(error)throw error;return data};
   async function session(){
