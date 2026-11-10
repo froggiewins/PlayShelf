@@ -43,7 +43,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var
 .logo{font:400 1.45rem var(--display);text-decoration:none;display:flex;align-items:center;gap:8px}
 .logo i{display:block;width:22px;height:26px;background:var(--accent);clip-path:polygon(0 0,72% 0,100% 18%,100% 100%,0 100%)}
 #search{flex:1 1 180px;min-width:0;padding:9px 12px;background:var(--surface);border:2px solid var(--ink);border-radius:0}
-.nav{display:flex;gap:8px;align-items:center}
+.nav{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 14px;border:2px solid var(--ink);background:var(--surface);font-weight:600;cursor:pointer;text-decoration:none;box-shadow:3px 3px 0 var(--ink);transition:transform .1s,box-shadow .1s;white-space:nowrap}
 .btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
 .btn:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--ink)}
@@ -142,6 +142,44 @@ dialog{border:2px solid var(--ink);background:var(--surface);color:var(--ink);pa
 dialog::backdrop{background:#0008}
 dialog h2{font-size:1.4rem;margin-bottom:12px}
 
+/* moderation */
+.badge{font:600 .66rem var(--mono);letter-spacing:.06em;padding:2px 7px;background:var(--danger);color:#fff;white-space:nowrap}
+.hid.review{background:var(--pop);color:var(--on-pop)}
+.count{display:inline-block;margin-left:6px;background:var(--danger);color:#fff;font:600 .7rem/1.5 var(--mono);padding:0 6px;border-radius:9px}
+.status{border:2px solid var(--ink);background:var(--pop);color:var(--on-pop);padding:10px 12px;font-size:.92rem;max-width:65ch}
+.status.bad{background:var(--danger);border-color:var(--danger);color:#fff}
+.panel{border:2px solid var(--line);background:var(--surface);padding:12px;display:flex;flex-direction:column;gap:10px;max-width:640px}
+.panel p{margin:0}
+.check{display:flex;gap:8px;align-items:center;cursor:pointer}
+.modbox{display:flex;flex-direction:column;gap:10px;border-top:2px dashed var(--line);padding-top:12px}
+.modbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.cmt .modbar{gap:12px}
+.btn.small{padding:5px 10px;font-size:.85rem;box-shadow:2px 2px 0 var(--ink)}
+.btn.small:hover{box-shadow:3px 3px 0 var(--ink)}
+.cmt.gone>p{opacity:.55}
+.rsum{font-size:.9rem;display:flex;flex-direction:column;gap:4px}
+.quote{border-left:3px solid var(--line);padding-left:10px;white-space:pre-wrap;overflow-wrap:anywhere;margin:0}
+.qlist{display:flex;flex-direction:column;gap:14px;max-width:820px}
+.qrow{border:2px solid var(--ink);background:var(--surface);padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.qrow .qtitle{font-weight:700;font-size:1.1rem;overflow-wrap:anywhere}
+.chiprow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.modh{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:14px}
+#modTabs{margin-bottom:18px}
+.modsec{display:flex;flex-direction:column;gap:12px;max-width:820px;margin-bottom:30px}
+.modsec h2{font-size:1.3rem}
+.wordlist{display:flex;flex-wrap:wrap;gap:6px}
+.word{display:inline-flex;align-items:center;font:.8rem var(--mono);border:1.5px solid var(--line);padding:2px 2px 2px 8px;background:var(--surface)}
+.word button{border:0;background:none;cursor:pointer;color:var(--muted);font-size:1rem;line-height:1;padding:2px 6px}
+.word button:hover{color:var(--danger)}
+.addrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.addrow input{flex:1 1 200px;min-width:0;max-width:340px}
+input[type=number]{width:100px;padding:8px 10px;background:var(--surface);border:2px solid var(--line);border-radius:0}
+.logrow{display:grid;grid-template-columns:7em minmax(0,9em) minmax(0,1fr);gap:4px 14px;padding:8px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+.logrow>*{min-width:0;overflow-wrap:anywhere}
+.banrow{display:flex;gap:10px;flex-wrap:wrap;align-items:baseline;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+#codeView{max-width:min(900px,calc(100vw - 32px));width:900px}
+#cvText{width:100%;min-height:50vh;margin-bottom:12px}
+@media (max-width:760px){.logrow{grid-template-columns:minmax(0,1fr)}}
 /* player */
 #player{position:fixed;inset:0;z-index:30;background:#0a0b16;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
 #player .pbar{display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px));color:#fff;flex-wrap:wrap}
@@ -157,6 +195,8 @@ dialog h2{font-size:1.4rem;margin-bottom:12px}
   .hero{gap:20px}
   .bar{gap:8px}
   #search{order:3;flex-basis:100%}
+  .nav{gap:6px}
+  .nav .btn{padding:7px 10px;font-size:.9rem}
   .logo{margin-right:auto}
   .grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px}
   .label b{font-size:2.6rem}
@@ -172,6 +212,7 @@ dialog h2{font-size:1.4rem;margin-bottom:12px}
   <div class="nav">
     <button class="btn flat" id="randomBtn" type="button">Surprise me</button>
     <a class="btn flat" href="#shelf">My shelf</a>
+    <a class="btn flat" href="#mod" id="modBtn" hidden>Moderation</a>
     <button class="btn flat" id="authBtn" type="button" hidden>Sign in</button>
     <a class="btn primary" href="#post">Add a project</a>
   </div>
@@ -262,7 +303,13 @@ dialog h2{font-size:1.4rem;margin-bottom:12px}
     <div class="shelfsec"><h2>Posted by you</h2><div id="sMine"></div></div>
     <div class="shelfsec"><h2>Liked</h2><div id="sLiked"></div></div>
     <div class="shelfsec"><h2>Recently opened</h2><div id="sRecent"></div></div>
-    <div class="shelfsec" id="sAdmin" hidden><h2>Reports</h2><div id="reports"></div></div>
+  </div>
+
+  <div id="vMod" hidden>
+    <a class="back" href="#">Back to the shelf</a>
+    <h1 class="modh">Moderation</h1>
+    <div class="seg" id="modTabs" role="group" aria-label="Moderation sections"></div>
+    <div id="modBody"></div>
   </div>
 
   <div id="vCreator" hidden>
@@ -279,6 +326,12 @@ dialog h2{font-size:1.4rem;margin-bottom:12px}
   <p class="err" id="sErr" hidden></p>
   <div class="actions"><button class="btn primary" type="submit">Email me a link</button><button class="btn flat" type="button" id="sClose">Close</button></div>
 </form></dialog>
+
+<dialog id="codeView">
+  <h2 id="cvTitle">Code</h2>
+  <textarea id="cvText" class="code" readonly spellcheck="false" aria-label="Uploaded code"></textarea>
+  <div class="actions"><button class="btn" type="button" id="cvClose">Close</button></div>
+</dialog>
 
 <div id="player" hidden>
   <div class="pbar"><strong id="plName"></strong><a class="btn" id="plOpen" target="_blank" rel="noopener noreferrer">Open in new tab</a><button class="btn" id="plFull" type="button">Fullscreen</button><button class="btn" id="plClose" type="button">Close</button></div>
@@ -326,6 +379,41 @@ const MAX_HTML=2000000, CHUNK=80000, MAX_PARTS=25;
 function chunks(t){const o=[];let i=0;while(i<t.length){let e=Math.min(i+CHUNK,t.length);const c=t.charCodeAt(e-1);if(e<t.length&&c>=0xD800&&c<0xDC00)e--;o.push(t.slice(i,e));i=e}return o.length?o:[""]}
 const sizeText=n=>n>=1e6?(n/1e6).toFixed(1)+" MB":Math.max(1,Math.round(n/1e3))+" KB";
 const INPUTS=["keyboard","mouse","touch","gamepad"];
+
+/* ── Automatic moderation. The same checks run again inside the database, so they can't be skipped. ── */
+const DEFAULT_WORDS=["fuck*","fck*","shit*","cunt*","bitch*","bastard*","asshole*","dickhead*","wanker*","slut*","whore*","porn*","nudes","hentai","xxx","retard*","kys","kill yourself","kill urself","go die"];
+const DEFAULT_DOMAINS=["grabify.link","iplogger.org","iplogger.com","iplogger.ru","2no.co","yip.su","ipgrabber.ru","blasze.com","ps3cfw.com","bit.ly","tinyurl.com","is.gd","cutt.ly","shorturl.at","rebrand.ly","t.ly"];
+const DEFAULT_SETTINGS={autoHide:3,reviewAll:false,reviewNewHours:0,commentsPer5:8};
+const LEET={"0":"o","1":"i","3":"e","4":"a","5":"s","7":"t","8":"b","9":"g","@":"a","$":"s","!":"i","|":"l"};
+const norm=t=>String(t||"").toLowerCase().replace(/[01345789@$!|]/g,c=>LEET[c]);
+const reEsc=t=>t.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+function blockedWord(t){
+  const n=norm(t);
+  for(const w of S.rules.words){
+    const base=w.replace("*","");
+    const re=new RegExp("(^|[^a-z0-9_])"+reEsc(base).replace(/ /g,"\\s+")+(w.endsWith("*")?"":"(?![a-z0-9_])"));
+    if(re.test(n)) return base;
+  }
+  return null;
+}
+function blockedDomain(t){
+  const n=String(t||"").toLowerCase();
+  return S.rules.domains.find(d=>new RegExp("(^|[^a-z0-9.-])([a-z0-9-]+\\.)*"+reEsc(d)+"([^a-z0-9.-]|$)").test(n))||null;
+}
+function scanHtml(html){
+  const t=String(html).toLowerCase();
+  if(/type\s*=\s*["']?password/.test(t)) return {level:"block",why:"Uploads can't ask for passwords. Remove the password box and try again."};
+  if(/(coinhive|coin-hive|cryptonight|crypto-loot|cryptoloot|webminepool|minero\.cc|monerominer|coinimp)/.test(t)) return {level:"block",why:"This file contains a cryptocurrency miner, which isn't allowed."};
+  const d=blockedDomain(t); if(d) return {level:"block",why:`This file links to ${d}, which isn't allowed here.`};
+  const review=[[/<form[^>]*action\s*=\s*["']?\s*(https?:)?\/\//,"It has a form that sends what people type to another website."],
+    [/(top|parent)\s*\.\s*location/,"It tries to change the address of the Playshelf page."],
+    [/eval\s*\(\s*(atob|unescape|decodeuricomponent|string\.fromcharcode)/,"It runs hidden, scrambled code."],
+    [/(\\x[0-9a-f]{2}){120}/,"It contains a large block of scrambled code."],
+    [/document\s*\.\s*cookie|navigator\s*\.\s*sendbeacon/,"It tries to read or send browser data."]];
+  for(const [re,why] of review) if(re.test(t)) return {level:"review",why};
+  return null;
+}
+const wordError=w=>`That includes a word that isn't allowed here ("${w}"). Change it and try again.`;
 function clean(p,owner){
   if(!p||typeof p!=="object") return null;
   const source=p.source==="html"?"html":"link";
@@ -338,7 +426,7 @@ function clean(p,owner){
     tags:(Array.isArray(p.tags)?p.tags:[]).filter(t=>typeof t==="string").map(t=>t.slice(0,24)).slice(0,5),
     inputs:(Array.isArray(p.inputs)?p.inputs:[]).filter(i=>INPUTS.includes(i)),
     multiplayer:!!p.multiplayer,palette:num(p.palette,PALS.length),pattern:num(p.pattern,PATS),
-    createdAt:time(p.createdAt),updatedAt:time(p.updatedAt),hidden:!!p.hidden};
+    createdAt:time(p.createdAt),updatedAt:time(p.updatedAt),hidden:!!p.hidden,held:!!p.held,heldReason:s(p.heldReason,200)};
 }
 
 /* ── Cartridge art: generated from a fixed palette and the project id, so no images need hosting ── */
@@ -358,17 +446,18 @@ function coverSVG(palette,pattern,seed){
 }
 
 /* ── App state ── */
-const S={loading:true,projects:[],likes:{},comments:[],plays:{},names:{},reports:[]};
-let me={id:null,isAdmin:false};
+const S={loading:true,projects:[],likes:{},comments:[],plays:{},names:{},reports:[],myReports:new Set(),bans:[],log:[],modMissing:false,
+  rules:{words:DEFAULT_WORDS,domains:DEFAULT_DOMAINS,settings:{...DEFAULT_SETTINGS}}};
+let me={id:null,isAdmin:false,banned:null};
 let backend=null;
 const ui={q:"",kind:"all",tag:null,sort:store.get("lk.sort","trending"),phone:false,multi:false,here:false,editing:null,creator:null};
 const recent=()=>store.get("lk.recent",[]);
 const likeCount=id=>(S.likes[id]||[]).length;
 const iLike=id=>!!me.id&&(S.likes[id]||[]).includes(me.id);
 const playCount=id=>S.plays[id]||0;
-const commentCount=id=>S.comments.filter(c=>c.pid===id).length;
+const commentCount=id=>S.comments.filter(c=>c.pid===id&&!c.hidden).length;
 const nameOf=u=>u&&u===me.id?(S.names[u]||"You"):(S.names[u]||"Someone");
-const visible=()=>S.projects.filter(p=>!p.hidden);
+const visible=()=>S.projects.filter(p=>!p.hidden&&!p.held);
 const trend=p=>{const days=(Date.now()-p.createdAt)/864e5;return (1+likeCount(p.id)*3+commentCount(p.id)*2+playCount(p.id)*.5)/Math.pow(Math.max(days,0)+2,1.25)};
 function ago(t){const s=(Date.now()-t)/1000;if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";if(s<2592000)return Math.floor(s/86400)+"d ago";return new Date(t).toLocaleDateString()}
 const plural=(n,w)=>n+" "+w+(n===1?"":"s");
@@ -378,7 +467,7 @@ function cart(p){
   const lab=h("div",{class:"label"});
   lab.innerHTML=coverSVG(p.palette,p.pattern,p.id);   // built only from numbers and the fixed palette
   lab.append(h("b",{},(p.title.trim()[0]||"?").toUpperCase()),h("span",{class:"kind"},p.kind==="app"?"WEB APP":"GAME"));
-  return h("a",{class:"cart",href:"#p-"+p.id},lab,p.hidden&&h("span",{class:"hid"},"HIDDEN"),
+  return h("a",{class:"cart",href:"#p-"+p.id},lab,(p.hidden||p.held)&&h("span",{class:"hid"+(p.hidden?"":" review")},p.hidden?"HIDDEN":"IN REVIEW"),
     h("div",{class:"txt"},h("h3",{},p.title),p.tagline&&h("p",{},p.tagline),
       h("div",{class:"foot mono"},h("span",{class:"host"},p.source==="html"?"Runs here":hostOf(p.url)),h("span",{},`${likeCount(p.id)} ♥ · ${playCount(p.id)} ▶`))));
 }
@@ -432,7 +521,71 @@ function renderBrowse(){
 }
 
 /* ── Detail ── */
-let reportOpen=false, delArm=false;
+let reportFor=null, rp={pick:null,note:""}, armed=null, banFor=null, banState={reason:"",wipe:false};
+const reportKey=(pid,cid)=>cid?"c:"+cid:"p:"+pid;
+const openReports=t=>S.reports.filter(r=>r.status==="open"&&r.pid===t.pid&&(r.cid||null)===(t.cid||null));
+const isBanned=uid=>S.bans.some(b=>b.uid===uid);
+function rememberReport(pid,cid){const k=reportKey(pid,cid);S.myReports.add(k);store.set("lk.reported",[...new Set([...store.get("lk.reported",[]),k])].slice(-500))}
+function arm(key,fn){if(armed===key){armed=null;fn()}else{armed=key;refresh()}}
+const armedText=(key,label)=>armed===key?"Click again to confirm":label;
+async function modDo(fn,msg){const ok=await act(fn);if(ok&&msg){say(msg);clearTimeout(modDo.t);modDo.t=setTimeout(()=>say(""),3500)}refresh();return ok}
+const P_REASONS=["Doesn't work","Harmful or unsafe","Asks for passwords or personal info","Not OK for kids","Spam","Stolen work"];
+const C_REASONS=["Rude or bullying","Not OK for kids","Spam","Something else"];
+function openReport(key){reportFor=reportFor===key?null:key;rp={pick:null,note:""};refresh()}
+function reportPanel(pid,cid){
+  const send=h("button",{class:"btn small primary",type:"button",disabled:!rp.pick},"Send report");
+  const chips=(cid?C_REASONS:P_REASONS).map(r=>h("button",{class:"chip"+(rp.pick===r?" on":""),type:"button","aria-pressed":String(rp.pick===r),onclick(e){
+    rp.pick=r;chips.forEach(c=>{const on=c===e.currentTarget;c.classList.toggle("on",on);c.setAttribute("aria-pressed",String(on))});send.disabled=false}},r));
+  const note=h("input",{type:"text",maxLength:300,value:rp.note,placeholder:"Anything a moderator should know? (optional)","aria-label":"Note for moderators",oninput(e){rp.note=e.target.value}});
+  send.addEventListener("click",async()=>{
+    send.disabled=true;
+    const ok=await act(()=>backend.report({pid,cid:cid||null,reason:rp.pick,note:rp.note.trim().slice(0,300)}));
+    if(ok){rememberReport(pid,cid);reportFor=null;say("Thanks. Your report was sent to the moderators.");setTimeout(()=>say(""),4000);refresh()}
+    else send.disabled=false;
+  });
+  return h("div",{class:"panel"},h("strong",{},cid?"What's wrong with this comment?":"What's wrong with this project?"),h("div",{class:"opts"},chips),note,
+    h("div",{class:"actions"},send,h("button",{class:"btn small flat",type:"button",onclick(){reportFor=null;refresh()}},"Cancel")));
+}
+function banPanel(uid){
+  const go=h("button",{class:"btn small primary",type:"button",onclick:()=>modDo(()=>backend.mod.ban(uid,banState.reason.trim(),banState.wipe),`${nameOf(uid)} is banned.`).then(ok=>{if(ok){banFor=null;refresh()}})},banState.wipe?"Ban and delete posts":"Ban");
+  return h("div",{class:"panel"},h("strong",{},`Ban ${nameOf(uid)}?`),
+    h("p",{class:"muted"},"They won't be able to post, upload, comment, like or report. They can still browse."),
+    h("input",{type:"text",maxLength:200,value:banState.reason,placeholder:"Reason (only moderators see this)","aria-label":"Reason for the ban",oninput(e){banState.reason=e.target.value}}),
+    h("label",{class:"check"},h("input",{type:"checkbox",checked:banState.wipe,onchange(e){banState.wipe=e.target.checked;go.textContent=banState.wipe?"Ban and delete posts":"Ban"}}),"Also delete everything they've posted"),
+    h("div",{class:"actions"},go,
+      h("button",{class:"btn small flat",type:"button",onclick(){banFor=null;refresh()}},"Cancel")));
+}
+function reportSummary(list){
+  if(!list.length) return null;
+  const counts={};list.forEach(r=>{counts[r.reason]=(counts[r.reason]||0)+1});
+  return h("div",{class:"rsum"},
+    h("span",{},h("strong",{},plural(list.length,"open report")+": "),Object.entries(counts).map(([r,n])=>r+(n>1?" ×"+n:"")).join(", ")),
+    ...list.filter(r=>r.note).slice(0,6).map(r=>h("p",{class:"quote"},r.note)));
+}
+/* Moderator buttons for one project or comment. */
+function modActions(t,{compact=false,after=null}={}){
+  const p=S.projects.find(x=>x.id===t.pid), c=t.cid?S.comments.find(x=>x.id===t.cid):null, target=t.cid?c:p;
+  if(!target||!backend?.mod) return [];
+  const key=reportKey(t.pid,t.cid), author=t.cid?c.author:p.owner, held=!t.cid&&p.held, hidden=target.hidden, opens=openReports(t);
+  const b=(label,fn,extra="")=>h("button",{class:(compact?"link":"btn small ")+" "+extra,type:"button",onclick:fn},label);
+  const out=[];
+  if(held||hidden||opens.length){
+    const label=held?"Approve":hidden?"Show again":"Dismiss reports";
+    out.push(b(label,()=>modDo(()=>backend.mod.keep(t),held?"Approved. Everyone can see it now.":hidden?"Visible to everyone again.":"Reports dismissed.")));
+  }
+  if(!hidden) out.push(b("Hide",()=>modDo(()=>backend.mod.hide(t),"Hidden from everyone.")));
+  if(!t.cid&&p.source==="html") out.push(b("View code",()=>viewCode(p),"flat"));
+  out.push(b(armedText("del:"+key,"Delete"),()=>arm("del:"+key,()=>modDo(()=>backend.mod.remove(t),"Deleted.").then(ok=>{if(ok&&after)after()})),"danger"));
+  if(backend.mod.features.bans&&author&&author!==me.id){
+    out.push(isBanned(author)?b("Unban "+(t.cid?"author":"creator"),()=>modDo(()=>backend.mod.unban(author),`${nameOf(author)} can post again.`))
+      :b("Ban "+(t.cid?"author":"creator"),()=>{banFor=banFor===key?null:key;banState={reason:"",wipe:false};refresh()},"danger"));
+  }
+  return out;
+}
+async function viewCode(p){
+  try{const t=await backend.loadHtml(p);$("cvTitle").textContent=p.title;$("cvText").value=t;$("codeView").showModal();$("cvText").scrollTop=0}
+  catch(e){say(e?.friendly||"That file couldn't be loaded.")}
+}
 function openProject(p){
   let ss=[];try{ss=JSON.parse(sessionStorage.getItem("lk.opened")||"[]")}catch{}
   if(!ss.includes(p.id)){ss.push(p.id);try{sessionStorage.setItem("lk.opened",JSON.stringify(ss))}catch{};if(me.id||backend?.anonPlays) backend?.open(p.id).catch(()=>{})}
@@ -441,14 +594,14 @@ function openProject(p){
 function renderDetail(id){
   const p=S.projects.find(x=>x.id===id);
   const info=$("dInfo");
-  if(!p||(p.hidden&&!me.isAdmin&&p.owner!==me.id)){
+  if(!p||((p.hidden||p.held)&&!me.isAdmin&&p.owner!==me.id)){
     $("dCart").replaceChildren();$("cForm").hidden=true;$("talkTitle").hidden=true;$("cList").replaceChildren();
-    info.replaceChildren(...[h("h1",{},S.loading?"Loading…":"Project not found"),!S.loading&&h("p",{class:"muted"},"It may have been removed by its creator.")].filter(Boolean));return;
+    info.replaceChildren(...[h("h1",{},S.loading?"Loading…":"Project not found"),!S.loading&&h("p",{class:"muted"},"It may have been removed by its creator or a moderator.")].filter(Boolean));return;
   }
   $("cForm").hidden=false;$("talkTitle").hidden=false;
   $("dCart").replaceChildren(cart(p));
   $("dCart").firstChild.removeAttribute("href");
-  const mine=p.owner&&p.owner===me.id, liked=iLike(p.id), acts=[];
+  const mine=p.owner&&p.owner===me.id, liked=iLike(p.id), acts=[], pkey=reportKey(p.id);
   const verb=p.kind==="game"?"Play here":"Open here";
   if(p.source==="html") acts.push(h("button",{class:"btn primary",type:"button",onclick(e){playHtml(p,e.currentTarget)}},verb));
   else{
@@ -459,32 +612,46 @@ function renderDetail(id){
   if(backend?.canEmbed||p.url) acts.push(h("button",{class:"btn flat",type:"button",onclick(e){copyLink(p,e.currentTarget)}},"Copy link"));
   const owners=[];
   if(mine) owners.push(h("a",{class:"btn flat",href:"#post",onclick(){ui.editing=p.id}},"Edit"),
-    h("button",{class:"btn flat danger",type:"button",onclick(){if(!delArm){delArm=true;renderDetail(id);return}delArm=false;act(async()=>{await backend.removeProject(p.id);if(p.source==="html")await backend.deleteHtml(p,0)}).then(()=>{location.hash=""})}},delArm?"Click again to delete":"Delete"));
-  if(me.isAdmin) owners.push(h("button",{class:"btn flat danger",type:"button",onclick:()=>act(()=>backend.setHidden("project",p.id,!p.hidden))},p.hidden?"Show again":"Hide from everyone"));
-  if(!mine) owners.push(h("button",{class:"link muted",type:"button",onclick(){reportOpen=!reportOpen;renderDetail(id)}},"Report"));
+    h("button",{class:"btn flat danger",type:"button",onclick:()=>arm("own:"+p.id,()=>act(async()=>{await backend.removeProject(p.id);if(p.source==="html")await backend.deleteHtml(p,0)}).then(ok=>{if(ok)location.hash=""}))},armedText("own:"+p.id,"Delete")));
+  if(!mine&&!me.isAdmin) owners.push(S.myReports.has(pkey)?h("span",{class:"muted"},"You reported this. Thanks."):h("button",{class:"link muted",type:"button",onclick(){openReport(pkey)}},"Report"));
   const facts=[["Made by",h("button",{class:"link",type:"button",onclick(){showCreator(p.owner)}},nameOf(p.owner))],
     ["Posted",ago(p.createdAt)+(p.updatedAt>p.createdAt+6e4?` · updated ${ago(p.updatedAt)}`:"")],
     ["Opened",plural(playCount(p.id),"time")],
     p.source==="html"&&["Size",sizeText(p.htmlSize)],
     p.inputs.length&&["Works with",p.inputs.map(i=>i==="touch"?"touchscreen":i).join(", ")],
     p.multiplayer&&["Players","Multiplayer"]].filter(Boolean);
+  const status=p.hidden?h("div",{class:"status bad"},"Hidden by a moderator. Only its creator and moderators can see it.")
+    :p.held?h("div",{class:"status"},h("strong",{},"Waiting for a moderator. "),p.heldReason?p.heldReason+" ":"",`Only ${mine?"you":"its creator"} and moderators can see it until it's approved.`):null;
+  const t={pid:p.id,cid:null};
   info.replaceChildren(...[
     h("span",{class:"eyebrow"},p.kind==="app"?"Web app":"Game"),
     h("h1",{},p.title),
+    status,
     p.tagline&&h("p",{style:"font-size:1.15rem"},p.tagline),
     h("div",{class:"actions"},acts),
     p.description&&h("p",{class:"desc"},p.description),
     p.tags.length&&h("div",{class:"tags"},p.tags.map(t=>h("button",{class:"chip",type:"button",onclick(){ui.tag=t;location.hash=""}},"#"+t))),
     h("dl",{class:"facts"},facts.flatMap(([a,b])=>[h("dt",{},a),h("dd",{},b)])),
-    h("div",{class:"actions"},owners),
-    reportOpen&&h("div",{class:"opts"},["Doesn't work","Harmful or unsafe","Asks for passwords or personal info","Spam","Stolen work"].map(r=>h("button",{class:"chip",type:"button",onclick(){reportOpen=false;act(()=>backend.report(p.id,r)).then(ok=>{if(ok)say("Thanks. Your report was sent to the site's moderators.");setTimeout(()=>say(""),4000)})}},r)))
+    owners.length&&h("div",{class:"actions"},owners),
+    reportFor===pkey&&reportPanel(p.id,null),
+    me.isAdmin&&h("div",{class:"modbox"},h("div",{class:"modbar"},h("span",{class:"eyebrow"},"Moderator"),...modActions(t,{after(){location.hash=""}})),
+      reportSummary(openReports(t)),banFor===pkey&&banPanel(p.owner))
   ].filter(Boolean));
-  const cs=S.comments.filter(c=>c.pid===id).sort((a,b)=>b.createdAt-a.createdAt);
-  $("talkTitle").textContent=plural(cs.length,"comment");
-  $("cList").replaceChildren(...cs.map(c=>h("div",{class:"cmt"},
-    h("div",{class:"meta"},h("strong",{},nameOf(c.author)),h("span",{class:"muted"},ago(c.createdAt)),
-      (c.author===me.id||me.isAdmin)&&h("button",{class:"link",type:"button",onclick:()=>act(()=>c.author===me.id?backend.removeComment(c):backend.setHidden("comment",c.id,true))},"Remove")),
-    h("p",{},c.text))));
+  const cs=S.comments.filter(c=>c.pid===id&&(!c.hidden||me.isAdmin)).sort((a,b)=>b.createdAt-a.createdAt);
+  $("talkTitle").textContent=plural(cs.filter(c=>!c.hidden).length,"comment");
+  $("cList").replaceChildren(...cs.map(c=>{
+    const key=reportKey(c.pid,c.id), ct={pid:c.pid,cid:c.id}, opens=me.isAdmin?openReports(ct):[], tools=[];
+    if(c.author===me.id) tools.push(h("button",{class:"link",type:"button",onclick:()=>arm("own:"+c.id,()=>act(()=>backend.removeComment(c)))},armedText("own:"+c.id,"Delete")));
+    else if(!me.isAdmin) tools.push(S.myReports.has(key)?h("span",{class:"muted"},"Reported"):h("button",{class:"link",type:"button",onclick(){openReport(key)}},"Report"));
+    return h("div",{class:"cmt"+(c.hidden?" gone":"")},
+      h("div",{class:"meta"},h("button",{class:"link",type:"button",onclick(){showCreator(c.author)}},nameOf(c.author)),h("span",{class:"muted"},ago(c.createdAt)),
+        c.hidden&&h("span",{class:"badge"},"HIDDEN"),opens.length>0&&h("span",{class:"badge"},plural(opens.length,"report").toUpperCase()),...tools),
+      h("p",{},c.text),
+      reportFor===key&&reportPanel(c.pid,c.id),
+      me.isAdmin&&h("div",{class:"modbar"},...modActions(ct,{compact:true})),
+      me.isAdmin&&reportSummary(opens),
+      banFor===key&&banPanel(c.author));
+  }));
 }
 async function copyLink(p,btn){
   const link=backend?.canEmbed?location.href.split("#")[0]+"#p-"+p.id:p.url;
@@ -548,10 +715,12 @@ function showCreator(u){ui.creator=u;if(location.hash==="#creator")route();else 
 async function act(fn){
   if(!me.id&&backend?.signIn){$("signin").showModal();return false}
   if(!me.id){say("You can browse here, but this view can't post, like or comment. Ask the site's owner for access.");return false}
+  if(me.banned!=null&&!me.isAdmin){say("Your account has been banned, so you can't post, comment, like or report. You can still browse.");return false}
   try{await fn();return true}catch(e){say(writeError(e));return false}
 }
 function writeError(e){
   if(e?.code==="invalid_argument"||e?.code==="42501") return "You can browse here, but your access doesn't include posting, liking or commenting. Ask the site's owner for Contributor access.";
+  if(e?.code==="23505") return "You already reported this. A moderator will look at it.";
   if(e?.code==="quota_exceeded") return "The shelf has reached its storage limit, so this wasn't saved. Older entries need removing first.";
   if(e?.code==="revoked") return "Your access to this page changed. Reload to see what you can still do.";
   return e?.message?`That didn't save: ${e.message}`:"That didn't save. Check your connection and try again.";
@@ -616,6 +785,14 @@ async function submitPost(e){
     if(dup) return err(`That link is already on the shelf as "${dup.title}".`);
   }
   if(!d.title) return err("Give your project a name.");
+  if(!me.isAdmin){
+    const w=blockedWord([d.title,d.tagline,d.description,d.tags.join(" ")].join(" "));
+    if(w) return err(wordError(w));
+    const dm=url&&blockedDomain(url);
+    if(dm) return err(`Links to ${dm} aren't allowed. If it's a short link, post the full address instead.`);
+    const sc=code&&scanHtml(code);
+    if(sc?.level==="block") return err(sc.why);
+  }
   const file=code?{parts:chunks(code).length,htmlSize:code.length}:{};
   $("pSubmit").disabled=true;
   try{
@@ -646,31 +823,132 @@ function renderShelf(){
   $("sMine").replaceChildren(gridOf(ps.filter(p=>p.owner&&p.owner===me.id).sort((a,b)=>b.createdAt-a.createdAt),"You haven't posted anything yet."));
   $("sLiked").replaceChildren(gridOf(visible().filter(p=>iLike(p.id)),"Projects you like will collect here."));
   $("sRecent").replaceChildren(gridOf(recent().map(id=>visible().find(p=>p.id===id)).filter(Boolean),"Projects you open will show up here."));
-  $("sAdmin").hidden=!me.isAdmin;
-  if(me.isAdmin){
-    $("reports").replaceChildren(...(S.reports.length?S.reports:[null]).map(r=>{
-      if(!r) return h("p",{class:"muted"},"No reports. All clear.");
-      const p=S.projects.find(x=>x.id===r.pid);
-      return h("div",{class:"row"},h("a",{href:"#p-"+r.pid},p?p.title:"(removed project)"),h("span",{},r.reason),h("span",{class:"muted"},ago(r.createdAt)));
-    }));
+}
+
+/* ── Moderation page ── */
+let modTab="queue", modDraft={word:"",domain:"",test:""}, setDraft=null;
+function queue(){
+  const groups=new Map();
+  for(const r of S.reports){
+    if(r.status!=="open") continue;
+    const k=reportKey(r.pid,r.cid);
+    if(!groups.has(k)) groups.set(k,{key:k,pid:r.pid,cid:r.cid||null,reports:[]});
+    groups.get(k).reports.push(r);
   }
+  for(const p of S.projects) if(p.held&&!groups.has(reportKey(p.id))) groups.set(reportKey(p.id),{key:reportKey(p.id),pid:p.id,cid:null,reports:[]});
+  return [...groups.values()].filter(g=>g.cid?S.comments.some(c=>c.id===g.cid):S.projects.some(p=>p.id===g.pid))
+    .sort((a,b)=>b.reports.length-a.reports.length||(b.reports[0]?.createdAt||0)-(a.reports[0]?.createdAt||0));
+}
+function queueRow(g){
+  const t={pid:g.pid,cid:g.cid}, p=S.projects.find(x=>x.id===g.pid), c=g.cid&&S.comments.find(x=>x.id===g.cid);
+  const by=uid=>h("button",{class:"link",type:"button",onclick(){showCreator(uid)}},nameOf(uid));
+  const chips=[];
+  if(!g.cid&&p.held) chips.push(h("span",{class:"hid review",style:"position:static"},"IN REVIEW"));
+  if((g.cid?c.hidden:p.hidden)) chips.push(h("span",{class:"badge"},"HIDDEN"));
+  if(!chips.length) chips.push(h("span",{class:"badge",style:"background:var(--ink);color:var(--bg)"},"LIVE"));
+  if(isBanned(g.cid?c.author:p.owner)) chips.push(h("span",{class:"badge"},"AUTHOR BANNED"));
+  return h("div",{class:"qrow"},
+    h("div",{class:"chiprow"},h("span",{class:"eyebrow"},g.cid?"Comment":p.source==="html"?"Uploaded "+(p.kind==="app"?"web app":"game"):"Linked "+(p.kind==="app"?"web app":"game")),...chips),
+    g.cid?h("p",{class:"quote"},c.text):h("a",{class:"qtitle",href:"#p-"+p.id},p.title),
+    h("span",{class:"muted"},"By ",by(g.cid?c.author:p.owner),g.cid?[" on ",p?h("a",{href:"#p-"+p.id},p.title):"a removed project"]:[" · ",p.source==="html"?sizeText(p.htmlSize)+" file":hostOf(p.url)]),
+    !g.cid&&p.held&&p.heldReason&&h("p",{},h("strong",{},"Why it's waiting: "),p.heldReason),
+    reportSummary(g.reports),
+    h("div",{class:"modbar"},...modActions(t)),
+    banFor===g.key&&banPanel(g.cid?c.author:p.owner));
+}
+function renderMod(){
+  const f=backend?.mod?.features||{}, q=queue();
+  const tabs=[["queue","Needs checking",q.length],["bans","Banned",S.bans.length,f.bans],["filters","Word and link filters",0,f.filters],["settings","Settings",0,f.settings],["log","Log",0,f.log]].filter(t=>t[3]!==false);
+  if(!tabs.some(t=>t[0]===modTab)) modTab="queue";
+  $("modTabs").replaceChildren(...tabs.map(([k,l,n])=>h("button",{class:"chip"+(modTab===k?" on":""),type:"button","aria-pressed":String(modTab===k),onclick(){modTab=k;setDraft=null;refresh()}},l,n?h("span",{class:"count"},String(n)):null)));
+  const body=[];
+  if(S.modMissing) body.push(h("div",{class:"status bad",style:"margin-bottom:16px"},"The moderation tables aren't in your database yet. Run supabase-moderation.sql in Supabase's SQL Editor, then reload."));
+  if(modTab==="queue"){
+    body.push(q.length?h("div",{class:"qlist"},q.map(queueRow)):h("div",{class:"empty"},h("h2",{},"All clear"),h("p",{class:"muted"},"Reported posts and comments, and uploads that need a check, show up here.")));
+  }
+  if(modTab==="bans"){
+    body.push(h("div",{class:"modsec"},S.bans.length?S.bans.map(b=>h("div",{class:"banrow"},
+      h("span",{},h("button",{class:"link",type:"button",onclick(){showCreator(b.uid)}},nameOf(b.uid))," ",h("span",{class:"muted"},"banned "+ago(b.at))),
+      h("span",{class:"muted"},b.reason||"No reason given"),
+      h("button",{class:"btn small",type:"button",onclick:()=>modDo(()=>backend.mod.unban(b.uid),`${nameOf(b.uid)} can post again.`)},"Unban"))):h("p",{class:"muted"},"Nobody is banned. Use Ban creator or Ban author on a post or comment to ban someone.")));
+  }
+  if(modTab==="filters"){
+    const list=(items,remove)=>h("div",{class:"wordlist"},items.length?[...items].sort().map(w=>h("span",{class:"word"},w,h("button",{type:"button","aria-label":"Remove "+w,title:"Remove",onclick:()=>modDo(()=>remove(w))},"×"))):h("span",{class:"muted"},"Nothing on the list."));
+    const add=(key,ph,valid,bad,addFn,items)=>{
+      const er=h("span",{class:"err",hidden:true});
+      return h("form",{class:"addrow",onsubmit(e){e.preventDefault();const v=valid(modDraft[key]);
+          if(!v){er.textContent=bad;er.hidden=false;return}
+          if(items.includes(v)){er.textContent="That's already on the list.";er.hidden=false;return}
+          modDo(()=>addFn(v)).then(ok=>{if(ok){modDraft[key]="";refresh()}})}},
+        h("input",{type:"text",id:"mod-"+key,placeholder:ph,value:modDraft[key],"aria-label":ph,oninput(e){modDraft[key]=e.target.value}}),h("button",{class:"btn small",type:"submit"},"Add"),er);
+    };
+    const validWord=v=>{v=String(v).trim().toLowerCase().replace(/\s+/g," ");return /^[a-z]+( [a-z]+)*\*?$/.test(v)&&v.length>=2&&v.length<=40?v:null};
+    const validDomain=v=>{v=String(v).trim().toLowerCase().replace(/^[a-z]+:\/\//,"").split(/[/?#:]/)[0];return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(v)?v:null};
+    const result=h("p",{class:"muted",role:"status"});
+    const test=()=>{const v=modDraft.test;if(!v.trim()){result.textContent="Type something to see if it would be allowed.";return}
+      const w=blockedWord(v), d=blockedDomain(v);result.textContent=w?`Blocked: it contains "${w}".`:d?`Blocked: it links to ${d}.`:"Allowed.";};
+    test();
+    body.push(h("div",{class:"modsec"},h("h2",{},"Blocked words"),
+      h("p",{class:"muted"},"Names, titles, descriptions, tags and comments can't use these. Matching ignores capitals and number swaps like 5h1t. End a word with * to also catch longer words, so fight* catches fighting. Moderators aren't filtered."),
+      list(S.rules.words,w=>backend.mod.removeWord(w)),
+      add("word","Add a word or phrase",validWord,"Use letters and spaces only, with an optional * at the end.",w=>backend.mod.addWord(w),S.rules.words)),
+    h("div",{class:"modsec"},h("h2",{},"Blocked sites"),
+      h("p",{class:"muted"},"Links to these sites, or any address ending in them, can't be posted or used inside uploads. The starting list blocks IP loggers and link shorteners, which hide where a link goes."),
+      list(S.rules.domains,d=>backend.mod.removeDomain(d)),
+      add("domain","Add a site, like example.com",validDomain,"Enter just the site, like example.com.",d=>backend.mod.addDomain(d),S.rules.domains)),
+    h("div",{class:"modsec"},h("h2",{},"Try the filters"),
+      h("input",{type:"text",id:"mod-test",value:modDraft.test,placeholder:"Type a title or comment","aria-label":"Text to check",oninput(e){modDraft.test=e.target.value;test()}}),result));
+  }
+  if(modTab==="settings"){
+    const st=setDraft=setDraft||{...S.rules.settings};
+    const num=(key,label,help,min,max)=>h("div",{class:"field"},h("label",{for:"set-"+key},label),
+      h("input",{type:"number",id:"set-"+key,min,max,value:String(st[key]),oninput(e){st[key]=e.target.value}}),h("small",{},help));
+    const err=h("p",{class:"err",hidden:true});
+    body.push(h("form",{class:"modsec",onsubmit(e){e.preventDefault();
+        const v={autoHide:Math.round(+st.autoHide),reviewAll:!!st.reviewAll,reviewNewHours:Math.round(+st.reviewNewHours),commentsPer5:Math.round(+st.commentsPer5)};
+        if(!(v.autoHide>=1&&v.autoHide<=100&&v.reviewNewHours>=0&&v.reviewNewHours<=720&&v.commentsPer5>=1&&v.commentsPer5<=100)){err.textContent="Check the numbers. Reports and comments need 1 to 100, and account age needs 0 to 720 hours.";err.hidden=false;return}
+        modDo(()=>backend.mod.saveSettings(v),"Settings saved.").then(ok=>{if(ok)setDraft=null})}},
+      num("autoHide","Reports before something is hidden automatically","When this many different people report a project or comment, it's hidden until a moderator checks it.",1,100),
+      h("label",{class:"check"},h("input",{type:"checkbox",id:"set-reviewAll",checked:!!st.reviewAll,onchange(e){st.reviewAll=e.target.checked}}),"Check every uploaded file before it goes live"),
+      num("reviewNewHours","Hold posts from new accounts (hours)","Projects from accounts younger than this wait for a moderator. 0 turns this off.",0,720),
+      num("commentsPer5","Most comments one person can post in 5 minutes","Stops people flooding the comments.",1,100),
+      err,h("div",{class:"actions"},h("button",{class:"btn primary",type:"submit"},"Save settings"))));
+  }
+  if(modTab==="log"){
+    const tgt=x=>{const p=S.projects.find(p=>p.id===x);if(p)return h("a",{href:"#p-"+p.id},p.title);
+      const c=S.comments.find(c=>c.id===x);if(c)return h("a",{href:"#p-"+c.pid},`Comment: "${c.text.slice(0,50)}"`);
+      if(S.names[x])return S.names[x];return x?x.slice(0,14):"";};
+    body.push(h("div",{class:"modsec"},S.log.length?S.log.slice(0,150).map(l=>h("div",{class:"logrow"},
+      h("span",{class:"muted mono"},ago(l.at)),h("span",{},l.who?nameOf(l.who):"Automatic"),
+      h("span",{},h("strong",{},l.action)," ",tgt(l.target),l.detail?h("span",{class:"muted"}," · "+l.detail):null))):h("p",{class:"muted"},"Moderator actions and automatic hides are recorded here.")));
+  }
+  $("modBody").replaceChildren(...body);
 }
 
 /* ── Routing ── */
-const VIEWS=["vBrowse","vDetail","vPost","vShelf","vCreator"];
+const VIEWS=["vBrowse","vDetail","vPost","vShelf","vCreator","vMod"];
+function updateChrome(){
+  const mb=$("modBtn");mb.hidden=!me.isAdmin;
+  if(me.isAdmin){const n=queue().length;mb.replaceChildren("Moderation",n?h("span",{class:"count"},String(n)):"")}
+}
 function show(v){VIEWS.forEach(x=>{$(x).hidden=x!==v})}
 let lastHash=null;
 function route(){
   const hash=location.hash.slice(1);
   const changed=hash!==lastHash; lastHash=hash;
+  updateChrome();
+  if(changed){reportFor=null;banFor=null;armed=null}
+  // Don't redraw under someone who is typing; new data shows once they move on.
+  else if(document.activeElement?.matches?.("#vMod input, #vDetail .panel input")) return;
   if(hash==="post"){
     show("vPost");
     if(changed) fillForm(ui.editing?S.projects.find(p=>p.id===ui.editing&&p.owner===me.id):null);
   }
   else{
     if(changed&&hash!=="post") ui.editing=null;
-    if(hash.startsWith("p-")){show("vDetail");if(changed){reportOpen=false;delArm=false;scrollTo(0,0);$("cErr").hidden=true}renderDetail(hash.slice(2))}
+    if(hash.startsWith("p-")){show("vDetail");if(changed){scrollTo(0,0);$("cErr").hidden=true}renderDetail(hash.slice(2))}
     else if(hash==="shelf"){show("vShelf");renderShelf()}
+    else if(hash==="mod"&&me.isAdmin){show("vMod");renderMod()}
     else if(hash==="creator"&&ui.creator){show("vCreator");$("crName").textContent=nameOf(ui.creator);$("crList").replaceChildren(gridOf(visible().filter(p=>p.owner===ui.creator).sort((a,b)=>b.createdAt-a.createdAt),"Nothing posted yet."))}
     else{show("vBrowse");renderBrowse()}
   }
@@ -694,8 +972,10 @@ async function artifactBackend(db,user){
     S.projects=[...byId.values()];
     const likes={}; raw.likes.forEach(d=>{const ids=d.data().ids;(Array.isArray(ids)?ids:[]).forEach(id=>{(likes[id]=likes[id]||[]).push(d.id)})}); S.likes=likes;
     const plays={}; raw.plays.forEach(d=>{const c=d.data().counts||{};Object.keys(c).forEach(k=>{if(c[k]>0)plays[k]=(plays[k]||0)+Math.min(1,+c[k]||0)})}); S.plays=plays;
-    S.comments=raw.comments.flatMap(d=>(d.data().items||[]).filter(c=>c&&typeof c.text==="string"&&!hideC.has(c.id)).map(c=>({id:String(c.id),pid:String(c.pid),author:d.id,text:c.text.slice(0,600),createdAt:+c.createdAt||0})));
-    S.reports=raw.reports.flatMap(d=>(d.data().items||[])).sort((a,b)=>b.createdAt-a.createdAt);
+    S.comments=raw.comments.flatMap(d=>(d.data().items||[]).filter(c=>c&&typeof c.text==="string").map(c=>({id:String(c.id),pid:String(c.pid),author:d.id,text:c.text.slice(0,600),createdAt:+c.createdAt||0,hidden:hideC.has(String(c.id))})));
+    const dismissed=new Set(raw.mod.dismissed||[]);
+    S.reports=raw.reports.flatMap(d=>(d.data().items||[]).filter(r=>r&&r.pid).map(r=>{const id=d.id+":"+r.createdAt;
+      return {id,pid:String(r.pid),cid:r.cid?String(r.cid):null,reporter:d.id,reason:String(r.reason||"").slice(0,60),note:String(r.note||"").slice(0,300),status:dismissed.has(id)?"dismissed":"open",createdAt:+r.createdAt||0}})).sort((a,b)=>b.createdAt-a.createdAt);
     refresh();
   }
   let q=Promise.resolve();
@@ -705,7 +985,7 @@ async function artifactBackend(db,user){
   let pending=4; const timer=setTimeout(()=>{if(S.loading){S.loading=false;say("The shelf can't be reached right now, so what you see may be out of date.");refresh()}},10000);
   const col=(name,key)=>{let first=true;db.collection(name).limit(1000).onSnapshot(s=>{raw[key]=s.docs;if(first&&!s.metadata.fromCache){first=false;if(--pending===0){clearTimeout(timer);S.loading=false;}}rebuild()},e=>{stop(e);if(first){first=false;if(--pending===0){clearTimeout(timer);S.loading=false;refresh()}}})};
   col("projects","projects");col("likes","likes");col("comments","comments");col("plays","plays");
-  db.doc("mod/state").onSnapshot(s=>{const d=s.data()||{};raw.mod={projects:d.projects||[],comments:d.comments||[]};rebuild()},()=>{});
+  db.doc("mod/state").onSnapshot(s=>{const d=s.data()||{};raw.mod={projects:d.projects||[],comments:d.comments||[],dismissed:d.dismissed||[]};rebuild()},()=>{});
   if(me.isAdmin) col2();
   function col2(){db.collection("reports").limit(500).onSnapshot(s=>{raw.reports=s.docs;rebuild()},()=>{})}
   return {
@@ -720,8 +1000,21 @@ async function artifactBackend(db,user){
     addComment:(pid,text)=>mutate("comments/"+uid,c=>({items:[...items(c),{id:newId(),pid,text,createdAt:Date.now()}].slice(-300)})),
     removeComment:cm=>mutate("comments/"+uid,c=>({items:items(c).filter(x=>x.id!==cm.id)})),
     open:id=>mutate("plays/"+uid,c=>({counts:{...(c.counts||{}),[id]:1}})),
-    report:(pid,reason)=>mutate("reports/"+uid,c=>({items:[...items(c),{pid,reason,createdAt:Date.now()}].slice(-50)})),
-    setHidden:(kind,id,on)=>mutate("mod/state",c=>{const key=kind==="project"?"projects":"comments";const l=(c[key]||[]).filter(x=>x!==id);if(on)l.push(id);return {...c,[key]:l}}),
+    report:({pid,cid,reason,note})=>mutate("reports/"+uid,c=>({items:[...items(c),{pid,cid,reason,note,createdAt:Date.now()}].slice(-50)})),
+    mod:(()=>{
+      const ids=t=>openReports(t).map(r=>r.id);
+      const state=fn=>mutate("mod/state",c=>{const n={projects:[...(c.projects||[])],comments:[...(c.comments||[])],dismissed:[...(c.dismissed||[])]};fn(n);n.dismissed=n.dismissed.slice(-2000);return n});
+      const list=t=>t.cid?"comments":"projects", tid=t=>t.cid||t.pid;
+      return {features:{bans:false,filters:false,settings:false,log:false},
+        keep:t=>state(n=>{n[list(t)]=n[list(t)].filter(x=>x!==tid(t));n.dismissed.push(...ids(t))}),
+        hide:t=>state(n=>{if(!n[list(t)].includes(tid(t)))n[list(t)].push(tid(t));n.dismissed.push(...ids(t))}),
+        async remove(t){
+          const done=ids(t);
+          if(t.cid){const c=S.comments.find(x=>x.id===t.cid);if(c)await mutate("comments/"+c.author,x=>({items:items(x).filter(i=>i.id!==t.cid)}))}
+          else{const p=S.projects.find(x=>x.id===t.pid);if(p){await mutate("projects/"+p.owner,x=>({items:items(x).filter(i=>i.id!==t.pid)}));for(let i=0;i<p.parts;i++)await db.doc(`projects/${p.owner}/files/${p.id}-${i}`).delete().catch(()=>{})}}
+          await state(n=>n.dismissed.push(...done));
+        }};
+    })(),
     async resolveNames(){
       if(!user) return;
       const ids=[...new Set([...S.projects.map(p=>p.owner),...S.comments.map(c=>c.author)].filter(Boolean))];
@@ -740,7 +1033,7 @@ async function supabaseBackend(){
   const must=({error,data})=>{if(error)throw error;return data};
   async function session(){
     const {data:{session:se}}=await sb.auth.getSession();
-    me={id:se?.user?.id||null,isAdmin:false};
+    me={id:se?.user?.id||null,isAdmin:false,banned:null};
     if(me.id){
       const pending=store.get("lk.pendingName",null);
       if(pending){await sb.from("profiles").upsert({id:me.id,name:pending});store.set("lk.pendingName",null)}
@@ -750,13 +1043,31 @@ async function supabaseBackend(){
     $("authBtn").hidden=false;$("authBtn").textContent=me.id?"Sign out":"Sign in";
   }
   async function load(){
-    const [pr,li,co,pl,na]=await Promise.all([sb.from("projects").select("*").limit(2000),sb.from("likes").select("project_id,user_id").limit(20000),sb.from("comments").select("*").eq("hidden",false).limit(5000),sb.from("plays").select("*").limit(2000),sb.from("profiles").select("*").limit(5000)]);
-    S.projects=must(pr).map(r=>clean({...r,htmlSize:r.html_size,parts:r.source==="html"?1:0,createdAt:Date.parse(r.created_at),updatedAt:Date.parse(r.updated_at)},r.owner)).filter(Boolean);
+    const [pr,li,co,pl,na]=await Promise.all([sb.from("projects").select("*").limit(2000),sb.from("likes").select("project_id,user_id").limit(20000),sb.from("comments").select("*").limit(5000),sb.from("plays").select("*").limit(2000),sb.from("profiles").select("*").limit(5000)]);
+    S.projects=must(pr).map(r=>clean({...r,htmlSize:r.html_size,parts:r.source==="html"?1:0,heldReason:r.held_reason,createdAt:Date.parse(r.created_at),updatedAt:Date.parse(r.updated_at)},r.owner)).filter(Boolean);
     const likes={};must(li).forEach(r=>{(likes[r.project_id]=likes[r.project_id]||[]).push(r.user_id)});S.likes=likes;
-    S.comments=must(co).map(r=>({id:r.id,pid:r.project_id,author:r.author,text:r.body,createdAt:Date.parse(r.created_at)}));
+    S.comments=must(co).map(r=>({id:r.id,pid:r.project_id,author:r.author,text:r.body,hidden:!!r.hidden,createdAt:Date.parse(r.created_at)}));
     const plays={};must(pl).forEach(r=>{plays[r.project_id]=r.count});S.plays=plays;
     const names={};must(na).forEach(r=>{names[r.id]=r.name});S.names=names;
-    if(me.isAdmin){const {data}=await sb.from("reports").select("*").order("created_at",{ascending:false}).limit(200);S.reports=(data||[]).map(r=>({pid:r.project_id,reason:r.reason,createdAt:Date.parse(r.created_at)}))}
+    // Moderation data. If the moderation SQL hasn't been run yet, the site keeps working with the built-in lists.
+    const [wo,dm,st,rp,bn,lg]=await Promise.all([sb.from("blocked_words").select("word").limit(2000),sb.from("blocked_domains").select("domain").limit(2000),sb.from("mod_settings").select("*").limit(1),
+      me.id?sb.from("reports").select("*").order("created_at",{ascending:false}).limit(1000):{data:[]},
+      me.id?sb.from("bans").select("*").limit(5000):{data:[]},
+      me.isAdmin?sb.from("mod_log").select("*").order("at",{ascending:false}).limit(150):{data:[]}]);
+    S.modMissing=!!(wo.error||st.error);
+    if(!wo.error) S.rules.words=wo.data.map(r=>r.word);
+    if(!dm.error) S.rules.domains=dm.data.map(r=>r.domain);
+    const s0=!st.error&&st.data?.[0];
+    if(s0) S.rules.settings={autoHide:s0.auto_hide_reports,reviewAll:s0.review_all_uploads,reviewNewHours:s0.review_new_accounts_hours,commentsPer5:s0.comments_per_5_min};
+    S.reports=(rp.data||[]).map(r=>({id:r.id,pid:r.project_id,cid:r.comment_id||null,reporter:r.reporter,reason:r.reason,note:r.note||"",status:r.status||"open",createdAt:Date.parse(r.created_at)}));
+    S.myReports=new Set([...store.get("lk.reported",[]),...S.reports.filter(r=>r.reporter===me.id).map(r=>reportKey(r.pid,r.cid))]);
+    if(!me.isAdmin) S.reports=[];
+    const bans=(bn.data||[]).map(b=>({uid:b.user_id,reason:b.reason||"",at:Date.parse(b.banned_at)}));
+    const mine=bans.find(b=>b.uid===me.id);
+    if(mine&&me.banned==null) say("Your account has been banned, so you can't post, comment, like or report. You can still browse.");
+    me.banned=mine?mine.reason:null;
+    S.bans=me.isAdmin?bans:[];
+    S.log=(lg.data||[]).map(l=>({at:Date.parse(l.at),who:l.moderator,action:l.action,target:l.target,detail:l.detail}));
     S.loading=false;refresh();
   }
   let t=null;const soon=()=>{clearTimeout(t);t=setTimeout(()=>load().catch(e=>say(writeError(e))),250)};
@@ -781,34 +1092,86 @@ async function supabaseBackend(){
     addComment:(pid,text)=>done(sb.from("comments").insert({project_id:pid,author:me.id,body:text})),
     removeComment:c=>done(sb.from("comments").delete().eq("id",c.id)),
     open:id=>done(sb.rpc("bump_play",{pid:id})),
-    report:(pid,reason)=>done(sb.from("reports").insert({project_id:pid,reporter:me.id,reason})),
-    setHidden:(kind,id,on)=>done(sb.from(kind==="project"?"projects":"comments").update({hidden:on}).eq("id",id))
+    report:({pid,cid,reason,note})=>done(sb.from("reports").insert({project_id:pid,comment_id:cid||null,reporter:me.id,reason,note})),
+    mod:(()=>{
+      const reports=(t,status)=>{let q=sb.from("reports").update({status}).eq("project_id",t.pid).eq("status","open");return t.cid?q.eq("comment_id",t.cid):q.is("comment_id",null)};
+      const label=t=>t.cid?(S.comments.find(c=>c.id===t.cid)?.text||"").slice(0,80):(S.projects.find(p=>p.id===t.pid)?.title||"");
+      const note=(act,tgt,info)=>sb.rpc("mod_note",{act,tgt:String(tgt||"").slice(0,120),info:String(info||"").slice(0,300)});
+      const run=async(...qs)=>{for(const q of qs)must(await q);soon()};
+      return {features:{bans:true,filters:true,settings:true,log:true},
+        keep:t=>run(t.cid?sb.from("comments").update({hidden:false}).eq("id",t.cid):sb.from("projects").update({held:false,held_reason:"",hidden:false}).eq("id",t.pid),
+          reports(t,"dismissed"),note(t.cid?"kept comment":"approved project",t.cid||t.pid,label(t))),
+        hide:t=>run(t.cid?sb.from("comments").update({hidden:true}).eq("id",t.cid):sb.from("projects").update({hidden:true,held:false,held_reason:""}).eq("id",t.pid),
+          reports(t,"resolved"),note(t.cid?"hid comment":"hid project",t.cid||t.pid,label(t))),
+        async remove(t){const l=label(t);await run(note(t.cid?"deleted comment":"deleted project",t.cid||t.pid,l),t.cid?sb.from("comments").delete().eq("id",t.cid):sb.from("projects").delete().eq("id",t.pid))},
+        ban:(uid,why,wipe)=>run(sb.rpc("ban_user",{target:uid,why:why||"",wipe:!!wipe})),
+        unban:uid=>run(sb.rpc("unban_user",{target:uid})),
+        addWord:w=>run(sb.from("blocked_words").insert({word:w}),note("blocked word","",w)),
+        removeWord:w=>run(sb.from("blocked_words").delete().eq("word",w),note("unblocked word","",w)),
+        addDomain:d=>run(sb.from("blocked_domains").insert({domain:d}),note("blocked site","",d)),
+        removeDomain:d=>run(sb.from("blocked_domains").delete().eq("domain",d),note("unblocked site","",d)),
+        saveSettings:v=>run(sb.from("mod_settings").update({auto_hide_reports:v.autoHide,review_all_uploads:v.reviewAll,review_new_accounts_hours:v.reviewNewHours,comments_per_5_min:v.commentsPer5}).eq("id",1),
+          note("changed settings","",`auto-hide at ${v.autoHide} reports, review all uploads ${v.reviewAll?"on":"off"}, new accounts ${v.reviewNewHours}h, ${v.commentsPer5} comments per 5 min`))
+      };
+    })()
   };
 }
 
 /* ── Backend 3: Practice mode. Everything stays in this browser until Supabase is set up. ── */
 function localBackend(){
-  me={id:"local",isAdmin:true};
-  const d=store.get("lk.local",{projects:[],likes:[],comments:[],plays:{},hidden:[]});
+  me={id:"local",isAdmin:store.get("lk.localRole","admin")!=="user",banned:null};
+  const d=Object.assign({projects:[],likes:[],comments:[],plays:{},hidden:[],reports:[],bans:[],log:[],words:DEFAULT_WORDS,domains:DEFAULT_DOMAINS,settings:{...DEFAULT_SETTINGS}},store.get("lk.local",{}));
   S.names={local:"You"};
-  const sync=()=>{store.set("lk.local",d);S.projects=d.projects.map(p=>{const x=clean(p,"local");if(x)x.hidden=d.hidden.includes(x.id);return x}).filter(Boolean);
-    S.likes=Object.fromEntries(d.likes.map(i=>[i,["local"]]));S.comments=d.comments;S.plays=d.plays;S.loading=false;refresh()};
+  const sync=()=>{store.set("lk.local",d);
+    S.projects=d.projects.map(p=>{const x=clean(p,"local");if(x)x.hidden=d.hidden.includes(x.id);return x}).filter(Boolean);
+    S.likes=Object.fromEntries(d.likes.map(i=>[i,["local"]]));S.comments=d.comments.map(c=>({...c,hidden:!!c.hidden}));S.plays=d.plays;
+    S.reports=d.reports;S.bans=d.bans;S.log=d.log;S.rules={words:d.words,domains:d.domains,settings:d.settings};
+    S.myReports=new Set([...store.get("lk.reported",[]),...d.reports.map(r=>reportKey(r.pid,r.cid))]);
+    S.loading=false;refresh()};
   sync();
   const go=fn=>async(...a)=>{fn(...a);sync()};
+  const proj=id=>d.projects.find(p=>p.id===id), cmt=id=>d.comments.find(c=>c.id===id);
+  const log=(action,target,detail="",who="local")=>{d.log.unshift({at:Date.now(),who,action,target,detail});d.log=d.log.slice(0,200)};
+  const settle=(t,status)=>d.reports.forEach(r=>{if(r.status==="open"&&r.pid===t.pid&&(r.cid||null)===(t.cid||null))r.status=status});
   return {
     canEmbed:location.protocol!=="about:",
-    async saveHtml(id,html){try{localStorage.setItem("lk.file."+id,html)}catch{throw new Error("this browser has no room for that file in practice mode")}},
-    async loadHtml(p){const t=store.get===undefined?null:(()=>{try{return localStorage.getItem("lk.file."+p.id)}catch{return null}})();if(t==null)throw {friendly:"This project's file is missing."};return t},
+    async saveHtml(id,html){
+      try{localStorage.setItem("lk.file."+id,html)}catch{throw new Error("this browser has no room for that file in practice mode")}
+      const sc=me.isAdmin?null:scanHtml(html), why=sc?.level==="review"?sc.why:(!me.isAdmin&&d.settings.reviewAll?"Every upload is checked by a moderator before it goes live.":null);
+      const p=proj(id);if(p&&why){p.held=true;p.heldReason=why}
+      sync();
+    },
+    async loadHtml(p){let t=null;try{t=localStorage.getItem("lk.file."+p.id)}catch{}if(t==null)throw {friendly:"This project's file is missing."};return t},
     async deleteHtml(p){try{localStorage.removeItem("lk.file."+p.id)}catch{}},
-    addProject:go(p=>d.projects.push(p)),
-    updateProject:go((id,p)=>{d.projects=d.projects.map(x=>x.id===id?p:x)}),
+    addProject:go(p=>d.projects.push({...p,held:false,heldReason:""})),
+    updateProject:go((id,p)=>{d.projects=d.projects.map(x=>x.id===id?{...p,held:x.held,heldReason:x.heldReason}:x)}),
     removeProject:go(id=>{d.projects=d.projects.filter(x=>x.id!==id)}),
     setLike:go((id,on)=>{d.likes=d.likes.filter(x=>x!==id);if(on)d.likes.push(id)}),
-    addComment:go((pid,text)=>d.comments.push({id:newId(),pid,author:"local",text,createdAt:Date.now()})),
+    addComment:go((pid,text)=>d.comments.push({id:newId(),pid,author:"local",text,createdAt:Date.now(),hidden:false})),
     removeComment:go(c=>{d.comments=d.comments.filter(x=>x.id!==c.id)}),
     open:go(id=>{d.plays[id]=(d.plays[id]||0)+1}),
-    report:go(()=>{}),
-    setHidden:go((k,id,on)=>{if(k==="project"){d.hidden=d.hidden.filter(x=>x!==id);if(on)d.hidden.push(id)}else d.comments=d.comments.filter(x=>x.id!==id)})
+    report:go(({pid,cid,reason,note})=>{
+      d.reports.unshift({id:newId(),pid,cid:cid||null,reporter:"local",reason,note,status:"open",createdAt:Date.now()});
+      const n=d.reports.filter(r=>r.status==="open"&&r.pid===pid&&(r.cid||null)===(cid||null)).length;
+      if(n>=d.settings.autoHide){
+        if(cid){const c=cmt(cid);if(c&&!c.hidden){c.hidden=true;log("auto-hid comment",cid,n+" reports",null)}}
+        else{const p=proj(pid);if(p&&!p.held){p.held=true;p.heldReason=`Hidden automatically after ${n} reports. A moderator will check it.`;log("auto-hid project",pid,n+" reports",null)}}
+      }
+    }),
+    mod:{features:{bans:true,filters:true,settings:true,log:true},
+      keep:go(t=>{if(t.cid){const c=cmt(t.cid);if(c)c.hidden=false}else{const p=proj(t.pid);if(p){p.held=false;p.heldReason=""}d.hidden=d.hidden.filter(x=>x!==t.pid)}settle(t,"dismissed");log(t.cid?"kept comment":"approved project",t.cid||t.pid)}),
+      hide:go(t=>{if(t.cid){const c=cmt(t.cid);if(c)c.hidden=true}else{const p=proj(t.pid);if(p){p.held=false;p.heldReason=""}if(!d.hidden.includes(t.pid))d.hidden.push(t.pid)}settle(t,"resolved");log(t.cid?"hid comment":"hid project",t.cid||t.pid)}),
+      remove:go(t=>{if(t.cid){d.comments=d.comments.filter(c=>c.id!==t.cid);d.reports=d.reports.filter(r=>r.cid!==t.cid)}
+        else{d.projects=d.projects.filter(p=>p.id!==t.pid);d.comments=d.comments.filter(c=>c.pid!==t.pid);d.reports=d.reports.filter(r=>r.pid!==t.pid);try{localStorage.removeItem("lk.file."+t.pid)}catch{}}
+        log(t.cid?"deleted comment":"deleted project",t.cid||t.pid)}),
+      ban:go((uid,reason)=>{d.bans=d.bans.filter(b=>b.uid!==uid);d.bans.push({uid,reason,at:Date.now()});log("banned",uid,reason)}),
+      unban:go(uid=>{d.bans=d.bans.filter(b=>b.uid!==uid);log("unbanned",uid)}),
+      addWord:go(w=>{d.words=[...d.words,w];log("blocked word","",w)}),
+      removeWord:go(w=>{d.words=d.words.filter(x=>x!==w);log("unblocked word","",w)}),
+      addDomain:go(x=>{d.domains=[...d.domains,x];log("blocked site","",x)}),
+      removeDomain:go(x=>{d.domains=d.domains.filter(y=>y!==x);log("unblocked site","",x)}),
+      saveSettings:go(v=>{d.settings=v;log("changed settings","")})
+    }
   };
 }
 
@@ -828,16 +1191,22 @@ $("fDrop").addEventListener("drop",e=>{e.preventDefault();takeFile(e.dataTransfe
 $("fTry").addEventListener("click",()=>{const t=currentHtml();if(t)runHtml($("fName").value.trim()||"Test run",t,null,"")});
 $("cForm").addEventListener("submit",async e=>{
   e.preventDefault();const t=$("cText").value.trim();if(!t) return;
-  const pid=location.hash.slice(3);
+  const pid=location.hash.slice(3), ce=$("cErr");ce.hidden=true;
+  if(!me.isAdmin){
+    const w=blockedWord(t), d=blockedDomain(t);
+    if(w||d){ce.textContent=w?wordError(w):"That comment links to a site that isn't allowed here.";ce.hidden=false;return}
+  }
   if(await act(()=>backend.addComment(pid,t))) $("cText").value="";
 });
 $("plClose").addEventListener("click",closePlayer);
+$("cvClose").addEventListener("click",()=>$("codeView").close());
 $("plFull").addEventListener("click",()=>{$("player").requestFullscreen?.().catch(()=>{})});
 $("authBtn").addEventListener("click",()=>{if(me.id)backend.signOut();else $("signin").showModal()});
 $("sClose").addEventListener("click",()=>$("signin").close());
 $("sForm").addEventListener("submit",async e=>{
   e.preventDefault();const em=$("sEmail").value.trim(),n=$("sName").value.trim(),er=$("sErr");
   if(!n||!/.+@.+\..+/.test(em)){er.textContent="Enter a display name and your email address.";er.hidden=false;return}
+  const bw=blockedWord(n);if(bw){er.textContent=wordError(bw);er.hidden=false;return}
   try{await backend.signIn(em,n.slice(0,30));$("signin").close();say(`Check ${em} for your sign-in link.`)}catch(x){er.textContent=x.message||"The link couldn't be sent. Try again.";er.hidden=false}
 });
 addEventListener("hashchange",route);
