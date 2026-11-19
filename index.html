@@ -312,6 +312,14 @@ input[type=number]{width:100px;padding:8px 10px;background:var(--surface);border
     <div id="modBody"></div>
   </div>
 
+  <div id="vCheck" hidden>
+    <a class="back" href="#">Back to the shelf</a>
+    <h1 class="modh">Connection check</h1>
+    <p class="muted" style="max-width:60ch;margin-bottom:16px">This tests each thing Playshelf needs to load, so you can see which part is failing without developer tools.</p>
+    <div class="actions" style="margin-bottom:16px"><button class="btn primary" type="button" id="chkRun">Run the check again</button><button class="btn flat" type="button" id="chkCopy">Copy results</button></div>
+    <div id="chkList" class="qlist"></div>
+  </div>
+
   <div id="vCreator" hidden>
     <a class="back" href="#">Back to the shelf</a>
     <p class="eyebrow">Creator</p><h1 id="crName" style="font-size:2.2rem;margin-bottom:18px"></h1><div id="crList"></div>
@@ -517,7 +525,7 @@ function renderBrowse(){
   if(S.loading){list.replaceChildren(h("p",{class:"muted"},"Loading the shelf…"));return}
   if(S.offline){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"The shelf can't load right now"),
     h("p",{class:"muted"},"Playshelf can't reach its database. This usually sorts itself out, so try again in a minute."),
-    h("button",{class:"btn pop",type:"button",onclick(){location.reload()}},"Try again")));return}
+    h("div",{class:"actions",style:"justify-content:center"},h("button",{class:"btn pop",type:"button",onclick(){location.reload()}},"Try again"),h("a",{class:"btn flat",href:"#check"},"Check the connection"))));return}
   if(!total){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"The shelf is empty"),h("p",{class:"muted"},"Add the first game or web app, and it shows up here for everyone."),h("a",{class:"btn pop",href:"#post"},"Add the first project")));return}
   if(!items.length){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"Nothing matches"),h("p",{class:"muted"},"Try a different search or clear your filters."),h("button",{class:"btn",type:"button",onclick(){Object.assign(ui,{q:"",kind:"all",tag:null,phone:false,multi:false,here:false});$("search").value="";renderBrowse()}},"Clear filters")));return}
   list.replaceChildren(gridOf(items));
@@ -928,8 +936,59 @@ function renderMod(){
   $("modBody").replaceChildren(...body);
 }
 
+/* ── Connection check: tests each step the site needs, in plain words ── */
+const LIB_URL="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";
+let checkResults=[];
+async function runCheck(){
+  const list=$("chkList"), rows=[];
+  const show=()=>list.replaceChildren(...rows.map(r=>h("div",{class:"qrow"},
+    h("div",{class:"chiprow"},h("span",{class:"badge",style:r.ok==null?"background:var(--muted)":r.ok?"background:#1f7a4d":""},r.ok==null?"CHECKING":r.ok?"OK":"PROBLEM"),h("strong",{},r.name)),
+    r.text&&h("p",{},r.text),r.fix&&h("p",{class:"muted"},r.fix))));
+  const step=async(name,fn)=>{const r={name,ok:null};rows.push(r);show();try{Object.assign(r,await fn())}catch(e){Object.assign(r,{ok:false,text:"Error: "+(e?.message||e)})}show();return r};
+  const timed=(u,o={})=>fetch(u,{...o,signal:AbortSignal.timeout(12000)});
+  const why=e=>e?.name==="TimeoutError"?"No answer after 12 seconds.":"The request was blocked or couldn't connect ("+(e?.message||e)+").";
+  await step("Internet connection",async()=>navigator.onLine?{ok:true,text:"This device says it's online."}:{ok:false,text:"This device says it's offline.",fix:"Connect to the internet, then run the check again."});
+  await step("Database library (from cdn.jsdelivr.net)",async()=>{
+    for(let i=0;i<30&&!window.supabase?.createClient;i++) await new Promise(r=>setTimeout(r,200));
+    if(window.supabase?.createClient) return {ok:true,text:"Loaded."};
+    try{const r=await timed(LIB_URL);return r.ok?{ok:true,text:"Reachable, but it hadn't finished loading yet. Reload the page."}:{ok:false,text:"jsDelivr answered with error "+r.status+"."}}
+    catch(e){return {ok:false,text:why(e),fix:"Your network or device may block cdn.jsdelivr.net. School and work networks sometimes do. Try another network, such as home Wi-Fi or a phone hotspot."}}
+  });
+  if(!SUPABASE_URL){await step("Database settings",async()=>({ok:false,text:"This copy has no database settings, so it runs in practice mode."}));checkResults=rows;return}
+  const host=new URL(SUPABASE_URL).host, hdr={apikey:SUPABASE_ANON_KEY};
+  await step(`Database server (${host})`,async()=>{
+    try{const r=await timed(SUPABASE_URL+"/auth/v1/health",{headers:hdr});
+      if(r.ok) return {ok:true,text:"The server answered."};
+      const t=(await r.text()).slice(0,200);
+      return {ok:false,text:`The server answered with error ${r.status}${t?": "+t:""}.`,fix:r.status>=500?"The Supabase project may be paused or restarting. Open it in the Supabase dashboard and click Resume project if you see it.":"Check the Supabase project settings."}}
+    catch(e){return {ok:false,text:why(e),fix:"Either your network blocks supabase.co, or the Supabase project is paused. Check the Supabase dashboard first. If the project is running, try another network."}}
+  });
+  await step("Reading the list of projects",async()=>{
+    try{const r=await timed(SUPABASE_URL+"/rest/v1/projects?select=id,kind",{headers:hdr});
+      const t=await r.text();
+      if(!r.ok) return {ok:false,text:`Error ${r.status}: ${t.slice(0,200)}`,fix:r.status===404?"The projects table is missing. Run supabase-setup.sql in Supabase's SQL Editor.":r.status>=500?"The Supabase project may be paused. Open the Supabase dashboard and resume it.":"Check that the key in index.html matches your project's publishable key."};
+      const rows2=JSON.parse(t), games=rows2.filter(x=>x.kind==="game").length;
+      return {ok:true,text:`Found ${plural(rows2.length,"project")} that anyone can see (${plural(games,"game")}, ${plural(rows2.length-games,"web app")}).`};
+    }catch(e){return {ok:false,text:why(e)}}
+  });
+  await step("Moderation tables",async()=>{
+    try{const r=await timed(SUPABASE_URL+"/rest/v1/mod_settings?select=id",{headers:hdr});
+      if(r.ok) return {ok:true,text:"Set up."};
+      const body=await r.text();
+      if(r.status===404||/PGRST20|42P01|does not exist|schema cache/i.test(body)) return {ok:false,text:"Not set up yet.",fix:"Run supabase-moderation.sql in Supabase's SQL Editor. The shelf still loads without it, but reporting won't work."};
+      return {ok:false,text:`Couldn't check (error ${r.status}). Fix the problems above first.`}}
+    catch(e){return {ok:false,text:why(e)}}
+  });
+  checkResults=rows;
+}
+$("chkRun").addEventListener("click",runCheck);
+$("chkCopy").addEventListener("click",async e=>{
+  const t=checkResults.map(r=>`${r.ok?"OK":"PROBLEM"} - ${r.name}: ${r.text||""}`).join("\n");
+  try{await navigator.clipboard.writeText(t);e.currentTarget.textContent="Copied"}catch{e.currentTarget.textContent="Select the text above to copy it"}
+});
+
 /* ── Routing ── */
-const VIEWS=["vBrowse","vDetail","vPost","vShelf","vCreator","vMod"];
+const VIEWS=["vBrowse","vDetail","vPost","vShelf","vCreator","vMod","vCheck"];
 function updateChrome(){
   const mb=$("modBtn");mb.hidden=!me.isAdmin;
   if(me.isAdmin){const n=queue().length;mb.replaceChildren("Moderation",n?h("span",{class:"count"},String(n)):"")}
@@ -952,6 +1011,7 @@ function route(){
     if(hash.startsWith("p-")){show("vDetail");if(changed){scrollTo(0,0);$("cErr").hidden=true}renderDetail(hash.slice(2))}
     else if(hash==="shelf"){show("vShelf");renderShelf()}
     else if(hash==="mod"&&me.isAdmin){show("vMod");renderMod()}
+    else if(hash==="check"){show("vCheck");if(changed)runCheck()}
     else if(hash==="creator"&&ui.creator){show("vCreator");$("crName").textContent=nameOf(ui.creator);$("crList").replaceChildren(gridOf(visible().filter(p=>p.owner===ui.creator).sort((a,b)=>b.createdAt-a.createdAt),"Nothing posted yet."))}
     else{show("vBrowse");renderBrowse()}
   }
@@ -1031,7 +1091,7 @@ async function artifactBackend(db,user){
 
 /* ── Backend 2: Supabase, for your own public website. Tables are in supabase-setup.sql. ── */
 async function supabaseBackend(){
-  await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";s.onload=ok;s.onerror=no;document.head.append(s)});
+  await new Promise((ok,no)=>{const s=document.createElement("script");s.src=LIB_URL;s.onload=ok;s.onerror=no;document.head.append(s)});
   const timed=(u,o={})=>fetch(u,o.signal?o:{...o,signal:AbortSignal.timeout(15000)});
   const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{global:{fetch:timed}});
   const must=({error,data})=>{if(error)throw error;return data};
