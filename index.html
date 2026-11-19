@@ -446,7 +446,7 @@ function coverSVG(palette,pattern,seed){
 }
 
 /* ── App state ── */
-const S={loading:true,projects:[],likes:{},comments:[],plays:{},names:{},reports:[],myReports:new Set(),bans:[],log:[],modMissing:false,
+const S={loading:true,offline:false,projects:[],likes:{},comments:[],plays:{},names:{},reports:[],myReports:new Set(),bans:[],log:[],modMissing:false,
   rules:{words:DEFAULT_WORDS,domains:DEFAULT_DOMAINS,settings:{...DEFAULT_SETTINGS}}};
 let me={id:null,isAdmin:false,banned:null};
 let backend=null;
@@ -493,7 +493,7 @@ function filtered(){
 }
 function renderSpot(){
   const all=visible(), box=$("spot"); box.replaceChildren();
-  if(!all.length){box.append(h("span",{class:"eyebrow"},"Today's pick"),h("a",{class:"ghost",href:"#post"},S.loading?"Loading the shelf…":"This slot is waiting for the first project. Yours could be it."));return}
+  if(!all.length){box.append(h("span",{class:"eyebrow"},"Today's pick"),h("a",{class:"ghost",href:"#post"},S.loading?"Loading the shelf…":S.offline?"Today's pick will be back once the shelf loads.":"This slot is waiting for the first project. Yours could be it."));return}
   const sorted=[...all].sort((a,b)=>a.id<b.id?-1:1);
   const day=Math.floor(Date.now()/864e5);
   box.append(h("span",{class:"eyebrow"},"Today's pick"),cart(sorted[day%sorted.length]));
@@ -515,6 +515,9 @@ function renderBrowse(){
   const list=$("list"),items=filtered(),total=visible().length;
   $("count").textContent=S.loading?"":total?`${items.length} of ${plural(total,"project")}`:"";
   if(S.loading){list.replaceChildren(h("p",{class:"muted"},"Loading the shelf…"));return}
+  if(S.offline){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"The shelf can't load right now"),
+    h("p",{class:"muted"},"Playshelf can't reach its database. This usually sorts itself out, so try again in a minute."),
+    h("button",{class:"btn pop",type:"button",onclick(){location.reload()}},"Try again")));return}
   if(!total){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"The shelf is empty"),h("p",{class:"muted"},"Add the first game or web app, and it shows up here for everyone."),h("a",{class:"btn pop",href:"#post"},"Add the first project")));return}
   if(!items.length){list.replaceChildren(h("div",{class:"empty"},h("h2",{},"Nothing matches"),h("p",{class:"muted"},"Try a different search or clear your filters."),h("button",{class:"btn",type:"button",onclick(){Object.assign(ui,{q:"",kind:"all",tag:null,phone:false,multi:false,here:false});$("search").value="";renderBrowse()}},"Clear filters")));return}
   list.replaceChildren(gridOf(items));
@@ -596,7 +599,7 @@ function renderDetail(id){
   const info=$("dInfo");
   if(!p||((p.hidden||p.held)&&!me.isAdmin&&p.owner!==me.id)){
     $("dCart").replaceChildren();$("cForm").hidden=true;$("talkTitle").hidden=true;$("cList").replaceChildren();
-    info.replaceChildren(...[h("h1",{},S.loading?"Loading…":"Project not found"),!S.loading&&h("p",{class:"muted"},"It may have been removed by its creator or a moderator.")].filter(Boolean));return;
+    info.replaceChildren(...[h("h1",{},S.loading?"Loading…":S.offline?"This project can't load right now":"Project not found"),!S.loading&&h("p",{class:"muted"},S.offline?"Playshelf can't reach its database. Try again in a minute.":"It may have been removed by its creator or a moderator.")].filter(Boolean));return;
   }
   $("cForm").hidden=false;$("talkTitle").hidden=false;
   $("dCart").replaceChildren(cart(p));
@@ -1029,7 +1032,8 @@ async function artifactBackend(db,user){
 /* ── Backend 2: Supabase, for your own public website. Tables are in supabase-setup.sql. ── */
 async function supabaseBackend(){
   await new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js";s.onload=ok;s.onerror=no;document.head.append(s)});
-  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  const timed=(u,o={})=>fetch(u,o.signal?o:{...o,signal:AbortSignal.timeout(15000)});
+  const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{global:{fetch:timed}});
   const must=({error,data})=>{if(error)throw error;return data};
   async function session(){
     const {data:{session:se}}=await sb.auth.getSession();
@@ -1070,7 +1074,7 @@ async function supabaseBackend(){
     S.log=(lg.data||[]).map(l=>({at:Date.parse(l.at),who:l.moderator,action:l.action,target:l.target,detail:l.detail}));
     S.loading=false;refresh();
   }
-  let t=null;const soon=()=>{clearTimeout(t);t=setTimeout(()=>load().catch(e=>say(writeError(e))),250)};
+  let t=null;const soon=()=>{clearTimeout(t);t=setTimeout(()=>load().catch(()=>{if(!S.offline&&!S.loading)say("The shelf couldn't refresh just now. It will try again shortly.")}),250)};
   await session();
   sb.auth.onAuthStateChange(()=>{setTimeout(()=>session().then(soon),0)});
   sb.channel("playshelf").on("postgres_changes",{event:"*",schema:"public"},soon).subscribe();
@@ -1219,7 +1223,14 @@ renderBrowse();route();
 
 (async function start(){
   try{
-    if(SUPABASE_URL&&SUPABASE_ANON_KEY){backend=await supabaseBackend();refresh();return}
+    if(SUPABASE_URL&&SUPABASE_ANON_KEY){
+      // If the database takes too long, say so instead of showing "Loading" forever. A late answer still fills the shelf.
+      const ready=supabaseBackend();
+      ready.then(b=>{backend=b;if(S.offline){S.offline=false;say("")}refresh()},()=>{});
+      try{await Promise.race([ready,new Promise((_,no)=>setTimeout(()=>no(new Error("timeout")),20000))])}
+      catch(e){if(!backend){S.loading=false;S.offline=true;refresh()}}
+      return;
+    }
     if(window.claude?.use){
       const [db,user]=await Promise.all([claude.use("db"),claude.use("user")]);
       if(db){backend=await artifactBackend(db,user);refresh();return}
